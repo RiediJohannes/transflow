@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+group = 'at.fhv'
+version = '1.0'
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://repo.eclipse.org/content/repositories/sumo-releases/'
+        name 'Public Eclipse SUMO Nexus'
+    }
+}
+
+dependencies {
+    implementation 'org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5'
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation 'org.eclipse.sumo:libsumo:1.17.0'
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,9 @@
+/misc.xml
+/workspace.xml
+/tasks.xml
+/usage.statistics.xml
+/shelf/
+*.iml
+*.iws
+/modules.xml
+/gradle.xml
