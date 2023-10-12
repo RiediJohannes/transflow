@@ -4,7 +4,7 @@ import org.eclipse.sumo.libsumo.TraCIColor;
 
 import java.awt.*;
 
-public class SumoMapper {
+public abstract class SumoMapper {
 
     private SumoMapper() {}
 

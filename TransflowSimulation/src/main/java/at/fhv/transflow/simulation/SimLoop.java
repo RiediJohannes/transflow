@@ -2,14 +2,26 @@ package at.fhv.transflow.simulation;
 
 import at.fhv.transflow.simulation.data.VehicleData;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class SimLoop {
 
     public static void main(String[] args) {
-        Path simConfig = Paths.get("sim/test.sumocfg");
+        // load the application configuration from the local properties file
+        try (InputStream props = Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties")) {
+            AppConfig.init(props);
+        } catch (IOException exp) {
+            throw new RuntimeException("Failed to initialize application config!", exp);
+        }
+
+        Path simConfig = Paths.get(AppConfig.getProperty("sim.path").orElseThrow(() ->
+            new RuntimeException("Missing property 'sim.path' in application properties! Define a path to the sumocfg file.")
+        ));
         SumoController simulation = new SumoController(simConfig);
+
 
         boolean loop = true;
         for (SimulationStep step : simulation) {
