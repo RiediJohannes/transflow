@@ -11,14 +11,14 @@ import java.util.Iterator;
  * Starts and closes a SUMO simulation configured in a <em>*.sumocfg</em> file.</p><br>
  * <p>Requires the sumo command line tool to be installed on the system.</p>
  */
-public class SumoController implements Iterable<SumoStep> {
+public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
     private final SumoStepIterator stepIterator;
 
     /**
      * Instantiates the controller for a new SUMO simulation as defined by the given sumocfg file.
      * @param simulationConfig Relative path to the simulation configuration file with the file extension <em>.sumocfg</em>.
      */
-    public SumoController(Path simulationConfig) {
+    public SumoSimulation(Path simulationConfig) {
         // load additional libraries if needed
 //        System.loadLibrary("iconv-2");
 //        System.loadLibrary("intl-8");
@@ -50,6 +50,11 @@ public class SumoController implements Iterable<SumoStep> {
      */
     public SumoStep skipToStep(int targetStep) {
         return stepIterator.setStep(targetStep);
+    }
+
+    @Override
+    public void close() {
+        Simulation.close();
     }
 
     @Override
