@@ -1,4 +1,4 @@
-package at.fhv.transflow.simulation.data;
+package at.fhv.transflow.simulation.sumo.data;
 
 import org.eclipse.sumo.libsumo.TraCIColor;
 

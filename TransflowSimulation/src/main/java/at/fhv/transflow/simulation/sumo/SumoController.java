@@ -1,4 +1,4 @@
-package at.fhv.transflow.simulation;
+package at.fhv.transflow.simulation.sumo;
 
 import org.eclipse.sumo.libsumo.Simulation;
 import org.eclipse.sumo.libsumo.StringVector;
@@ -12,7 +12,7 @@ import java.util.Iterator;
  * <p>Requires the sumo command line tool to be installed on the system.</p>
  */
 public class SumoController implements Iterable<SumoStep> {
-    private final SimulationStepIterator stepIterator;
+    private final SumoStepIterator stepIterator;
 
     /**
      * Instantiates the controller for a new SUMO simulation as defined by the given sumocfg file.
@@ -27,7 +27,7 @@ public class SumoController implements Iterable<SumoStep> {
 
         // start the simulation
         Simulation.start(new StringVector(new String[]{"sumo", "-c", simulationConfig.toString()}));
-        stepIterator = new SimulationStepIterator();
+        stepIterator = new SumoStepIterator();
     }
 
 
@@ -61,7 +61,7 @@ public class SumoController implements Iterable<SumoStep> {
     /**
      * Inner class to handle iteration over every simulation step ({@link SumoStep}) in the loaded SUMO traffic simulation.
      */
-    private static class SimulationStepIterator implements Iterator<SumoStep> {
+    private static class SumoStepIterator implements Iterator<SumoStep> {
         private int currentStep = 0;
 
         @Override

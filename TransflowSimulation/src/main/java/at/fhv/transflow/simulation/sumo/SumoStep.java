@@ -1,10 +1,10 @@
-package at.fhv.transflow.simulation;
+package at.fhv.transflow.simulation.sumo;
 
-import at.fhv.transflow.simulation.data.SumoMapper;
-import at.fhv.transflow.simulation.data.VehicleData;
+import at.fhv.transflow.simulation.sumo.data.SumoMapper;
+import at.fhv.transflow.simulation.sumo.data.VehicleData;
 import org.eclipse.sumo.libsumo.Vehicle;
 
-public class SumoStep implements SimulationStep {
+public class SumoStep {
     private final int id;
 
     public SumoStep(int stepId) {
