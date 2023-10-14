@@ -1,0 +1,64 @@
+version: "3.8"
+services:
+  emqx:
+    image: emqx/emqx:5.2.0
+    ports:
+      - "11883:11883"
+      - "18083:18083"
+      - "1883:1883"
+      - "8083:8083"   
+      - "8084:8084"
+      - "8883:8883"
+    volumes:
+      - emqx-data:/opt/emqx
+
+  influx-db:
+    image: influxdb:2.7.1
+    ports:
+      - "8086:8086"
+    volumes:
+      - influx-data:/var/lib/influxdb2
+      - influx-config:/etc/influxdb2
+    depends_on:
+      - emqx
+
+  telegraf:
+    image: telegraf:latest
+    ports:
+      - "8092:8092"
+      - "8094:8094"
+      - "8125:8125"
+    volumes:
+      - telegraf-data:/etc/telegraf
+    depends_on:
+      - influx-db
+
+
+volumes:
+  emqx-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./docker/data/emqx
+
+  influx-config:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./docker/data/influx/config
+
+  influx-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./docker/data/influx/db
+
+  telegraf-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./docker/data/telegraf
