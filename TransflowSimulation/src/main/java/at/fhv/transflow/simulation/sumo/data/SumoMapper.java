@@ -2,18 +2,12 @@ package at.fhv.transflow.simulation.sumo.data;
 
 import org.eclipse.sumo.libsumo.TraCIColor;
 
-import java.awt.*;
-
 public abstract class SumoMapper {
 
     private SumoMapper() {}
 
-    public static Color colorFromTraCI(TraCIColor traciColor) {
-        return new Color(
-                traciColor.getR(),
-                traciColor.getG(),
-                traciColor.getB(),
-                traciColor.getB()
-        );
+    public static String hexColorFromTraCI(TraCIColor traciColor) {
+        return String.format("#%02x%02x%02x%02x",
+            traciColor.getR(), traciColor.getG(), traciColor.getB(), traciColor.getA());
     }
 }

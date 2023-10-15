@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'idea'
+    id 'application'
 }
 
 group = 'at.fhv'
@@ -22,12 +23,17 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5'
-
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     implementation 'org.eclipse.sumo:libsumo:1.17.0'
+    implementation 'org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3'
+}
+
+application {
+    mainClass = 'at.fhv.transflow.simulation.SimLoop'
 }
 
 test {

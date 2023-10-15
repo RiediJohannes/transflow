@@ -25,7 +25,7 @@ public class SumoStep {
         return Vehicle.getIDList().stream()
             .map(id -> new VehicleData(
                 id,
-                SumoMapper.colorFromTraCI(Vehicle.getColor(id)),
+                SumoMapper.hexColorFromTraCI(Vehicle.getColor(id)),
                 Vehicle.getVehicleClass(id),
                 Vehicle.getLength(id),
                 Vehicle.getWidth(id),
