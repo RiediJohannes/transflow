@@ -52,7 +52,6 @@ public record VehicleData(
     String leaderVehicleId,
     double leaderVehicleDistance
 ) {
-
     public VehicleData {
         Objects.requireNonNull(id);
     }

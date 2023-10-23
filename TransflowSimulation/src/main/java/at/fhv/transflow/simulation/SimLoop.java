@@ -1,8 +1,10 @@
 package at.fhv.transflow.simulation;
 
+import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.JsonMapper;
-import at.fhv.transflow.simulation.messaging.MessagingService;
-import at.fhv.transflow.simulation.messaging.MqttService;
+import at.fhv.transflow.simulation.messaging.MessagingException;
+import at.fhv.transflow.simulation.messaging.mqtt.ConnectionException;
+import at.fhv.transflow.simulation.messaging.mqtt.MqttService;
 import at.fhv.transflow.simulation.sumo.SumoSimulation;
 import at.fhv.transflow.simulation.sumo.SumoStep;
 import at.fhv.transflow.simulation.sumo.data.VehicleData;
@@ -52,7 +54,7 @@ public class SimLoop {
 
 
         try (SumoSimulation simulation = new SumoSimulation(simConfig);
-             MessagingService mqtt = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
+             IMessagingService mqtt = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
 
             for (SumoStep step : simulation) {
                 System.out.println(step.getId());
@@ -66,15 +68,18 @@ public class SimLoop {
                     try {
                         String json = JsonMapper.instance().toJsonString(vehicleData);
                         VehicleData[] veh = JsonMapper.instance().fromJson(json, VehicleData[].class);
-                        System.out.println(veh[0].speed());
+                        System.out.println(veh[0].speed() + "\n");
                         mqtt.sendMessage("sim/0/vehicles", JsonMapper.instance().toJsonBytes(vehicleData), 1);
                     } catch (JsonProcessingException exp) {
-                        System.err.println("Failed to parse objects in time step " + step.getId());
+                        System.err.printf("Failed to parse objects in time step %s;\nReason: %s\n",
+                            step.getId(), exp.getMessage());
+                    } catch (ConnectionException exp) {
+                        System.err.printf(exp.getMessage());
                     }
                 }
-
-                System.out.println();
             }
+        } catch (MessagingException exp) {
+            throw new RuntimeException("Failed to establish a connection to the messaging service!", exp);
         } catch (Exception exp) {
             throw new RuntimeException("Unhandled exception!", exp);
         }
