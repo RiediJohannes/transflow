@@ -11,6 +11,8 @@ services:
       - "8883:8883"
     volumes:
       - emqx-data:/opt/emqx
+    env_file:
+      - docker/runtime.env
 
   influx-db:
     image: influxdb:2.7.1
@@ -21,6 +23,8 @@ services:
       - influx-config:/etc/influxdb2
     depends_on:
       - emqx
+    env_file:
+      - docker/runtime.env
 
   telegraf:
     image: telegraf:latest
@@ -32,6 +36,8 @@ services:
       - telegraf-data:/etc/telegraf
     depends_on:
       - influx-db
+    env_file:
+      - docker/runtime.env
 
 
 volumes:
