@@ -1,7 +1,9 @@
 version: "3.8"
+
 services:
   emqx:
     image: emqx/emqx:5.2.0
+    container_name: transflow-mqtt
     ports:
       - "11883:11883"
       - "18083:18083"
@@ -11,16 +13,21 @@ services:
       - "8883:8883"
     volumes:
       - emqx-data:/opt/emqx
+    networks:
+      - transflow
     env_file:
       - docker/runtime.env
 
   influx-db:
     image: influxdb:2.7.1
+    container_name: transflow-influx
     ports:
       - "8086:8086"
     volumes:
       - influx-data:/var/lib/influxdb2
       - influx-config:/etc/influxdb2
+    networks:
+      - transflow
     depends_on:
       - emqx
     env_file:
@@ -28,12 +35,15 @@ services:
 
   telegraf:
     image: telegraf:latest
+    container_name: transflow-telegraf
     ports:
       - "8092:8092"
       - "8094:8094"
       - "8125:8125"
     volumes:
       - telegraf-data:/etc/telegraf
+    networks:
+      - transflow
     depends_on:
       - influx-db
     env_file:
@@ -68,3 +78,8 @@ volumes:
       o: bind
       type: none
       device: ./docker/data/telegraf
+
+
+networks:
+  transflow:
+    driver: bridge
