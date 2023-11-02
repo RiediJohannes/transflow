@@ -1,4 +1,12 @@
+# general excludes
 /.idea
-/docker/data
+/docker/data/*
 /docker/backup
+
+# exclude environt variable files
 *.env
+
+# un-exclude the telegraf config
+!/docker/data/telegraf
+/docker/data/telegraf/*
+!/docker/**/telegraf.conf
