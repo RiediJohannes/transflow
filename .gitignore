@@ -3,10 +3,11 @@
 /docker/data/*
 /docker/backup
 
-# exclude environt variable files
+# exclude environment variable files
 *.env
 
 # un-exclude the telegraf config
 !/docker/data/telegraf
 /docker/data/telegraf/*
 !/docker/**/telegraf.conf
+!/docker/**/wait-for-it.sh

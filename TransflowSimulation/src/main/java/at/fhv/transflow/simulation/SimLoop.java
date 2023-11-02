@@ -56,7 +56,7 @@ public class SimLoop {
                             String json = JsonMapper.instance().toJsonString(vehicleData);
                             VehicleData[] veh = JsonMapper.instance().fromJson(json, VehicleData[].class);
                             System.out.println(veh[0].speed() + "\n");
-                            mqtt.sendMessage("sim/0/vehicles", JsonMapper.instance().toJsonBytes(vehicleData), 1);
+                            mqtt.sendMessage("sim/0/data", JsonMapper.instance().toJsonBytes(vehicleData), 1);
                         } catch (JsonProcessingException exp) {
                             System.err.printf("Failed to parse objects in time step %s;\nReason: %s\n",
                                 step.getId(), exp.getMessage());
