@@ -13,10 +13,19 @@ services:
       - "8883:8883"
     volumes:
       - emqx-data:/opt/emqx
-    networks:
-      - transflow
+    networks:  
+      transflow:
+        aliases:
+          - transflow.fhv.at
     env_file:
       - docker/runtime.env
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"] # check if EMQX is fully initialized (may take around 3 minutes)
+      interval: 30s  # time between the completion of the last check and the next health check
+      timeout: 100s   # maximum time for a check to complet (for some reason emqx ctl status regurarly takes upwards of 50s)
+      start_period: 300s  # failing checks during this time will not be counted towards the max retries -> give container time to startup
+      start_interval: 10s # time between health checks during startup period
+      retries: 2  # number of failing checks to be counted as unhealthy
 
   influx-db:
     image: influxdb:2.7.1
@@ -29,7 +38,8 @@ services:
     networks:
       - transflow
     depends_on:
-      - emqx
+      emqx:
+        condition: service_healthy
     env_file:
       - docker/runtime.env
 
@@ -37,17 +47,20 @@ services:
     image: telegraf:latest
     container_name: transflow-telegraf
     # wait for the MQTT service to fully initialize (setup its listener on port 1883) before starting telegraf
-    command: /etc/telegraf/wait-for-it.sh -t 0 transflow-mqtt:1883 -- telegraf
+    # command: /etc/telegraf/wait-for-it.sh -t 0 transflow-mqtt:1883 -- telegraf
     ports:
       - "8092:8092"
       - "8094:8094"
       - "8125:8125"
     volumes:
       - telegraf-data:/etc/telegraf
-    networks:
-      - transflow
+    networks:  
+      transflow:
+        aliases:
+          - transflow.fhv.at
     depends_on:
-      - influx-db
+      emqx:
+        condition: service_healthy
     env_file:
       - docker/runtime.env
 
