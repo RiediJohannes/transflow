@@ -71,7 +71,9 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
 
         @Override
         public SumoStep next() {
-            Simulation.step();
+            if (currentStep > 0) {
+                Simulation.step();
+            }
             return new SumoStep(currentStep++);
         }
 
