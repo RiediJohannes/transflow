@@ -8,6 +8,7 @@ import at.fhv.transflow.simulation.messaging.mqtt.MqttService;
 import at.fhv.transflow.simulation.sumo.SumoSimulation;
 import at.fhv.transflow.simulation.sumo.SumoStep;
 import at.fhv.transflow.simulation.sumo.data.VehicleData;
+import at.fhv.transflow.simulation.sumo.data.VehicleMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.sumo.libsumo.*;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 
 public class SimLoop {
 
@@ -45,22 +45,15 @@ public class SimLoop {
                  IMessagingService mqtt = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
 
                 for (SumoStep step : simulation) {
+                    // debug info
                     System.out.println("Step: " + step.getId());
                     System.out.println("NumVehicles: " + step.getVehicleCount());
 
+                    // subscribe to all properties of interest for every freshly loaded vehicle
                     for (String newVehicleId : Simulation.getLoadedIDList()) {
-                        Vehicle.subscribe(newVehicleId, new IntVector(VehicleData.Fields.sumoProperties()));
-                        Vehicle.subscribeLeader(newVehicleId); // leader can only be subscribed via this method
+                        Vehicle.subscribe(newVehicleId, new IntVector(VehicleMapper.Fields.sumoProperties()));
+                        Vehicle.subscribeLeader(newVehicleId, 200.0); // leader can only be subscribed via this method
                     }
-
-                    SubscriptionResults results = Vehicle.getAllSubscriptionResults();
-                    for (Map.Entry<String, TraCIResults> result : results.entrySet()) {
-                        System.out.println("Subscription arrived!");
-                        for (Map.Entry<Integer, TraCIResult> entry : result.getValue().entrySet()) {
-                            System.out.println("Property ID: " + entry.getKey() + ",\t value: " + entry.getValue().getString());
-                        }
-                    }
-
 
                     VehicleData[] vehicleData = step.getVehicleData();
 
@@ -68,6 +61,7 @@ public class SimLoop {
                         try {
                             String json = JsonMapper.instance().toJsonString(vehicleData);
                             VehicleData[] veh = JsonMapper.instance().fromJson(json, VehicleData[].class);
+
 //                            mqtt.sendMessage("sim/0/data", JsonMapper.instance().toJsonBytes(vehicleData), 1);
                         } catch (JsonProcessingException exp) {
                             System.err.printf("Failed to parse objects in time step %s;\nReason: %s\n",

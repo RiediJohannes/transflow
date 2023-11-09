@@ -1,8 +1,12 @@
 package at.fhv.transflow.simulation.sumo;
 
-import at.fhv.transflow.simulation.sumo.data.SumoMapper;
 import at.fhv.transflow.simulation.sumo.data.VehicleData;
+import at.fhv.transflow.simulation.sumo.data.VehicleMapper;
+import org.eclipse.sumo.libsumo.SubscriptionResults;
 import org.eclipse.sumo.libsumo.Vehicle;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SumoStep {
     private final int id;
@@ -21,55 +25,20 @@ public class SumoStep {
     }
 
     public VehicleData[] getVehicleData() {
-        // create a VehicleData object from every vehicle ID that's currently in the simulation
-        return Vehicle.getIDList().stream()
-            .map(id -> new VehicleData(
-                id,
-                SumoMapper.hexColorFromTraCI(Vehicle.getColor(id)),
-                Vehicle.getVehicleClass(id),
-                Vehicle.getLength(id),
-                Vehicle.getWidth(id),
-                Vehicle.getHeight(id),
-                Vehicle.getPersonCapacity(id),
-                Vehicle.getMaxSpeed(id),
-                Vehicle.getAcceleration(id),
-                Vehicle.getDecel(id),
-                Vehicle.getSpeedFactor(id),
-                Vehicle.getSpeedDeviation(id),
-                Vehicle.getShapeClass(id),
-                Vehicle.getTau(id),
-                Vehicle.getImperfection(id),
-                Vehicle.getRouteID(id),
-                Vehicle.getMinGap(id),
-                Vehicle.getMinGapLat(id),
+        SubscriptionResults results = Vehicle.getAllSubscriptionResults();
 
-                Vehicle.getSpeed(id),
-                Vehicle.getAcceleration(id),
-                Vehicle.getLateralSpeed(id),
-                Vehicle.getAllowedSpeed(id),
-                Vehicle.getAngle(id),
-                Vehicle.getRoadID(id),
-                Vehicle.getRouteIndex(id),
-                Vehicle.getLaneIndex(id),
-                Vehicle.getLanePosition(id),
-                Vehicle.getLaneChangeMode(id),
-                Vehicle.getSignals(id),
-                Vehicle.getStopState(id),
-                Vehicle.getPersonIDList(id),
-                Vehicle.getCO2Emission(id),
-                Vehicle.getHCEmission(id),
-                Vehicle.getPMxEmission(id),
-                Vehicle.getNOxEmission(id),
-                Vehicle.getFuelConsumption(id),
-                Vehicle.getElectricityConsumption(id),
-                Vehicle.getNoiseEmission(id),
-                Vehicle.getDistance(id),
-                Vehicle.getWaitingTime(id),
-                Vehicle.getTimeLoss(id),
-                Vehicle.getBoardingDuration(id),
-                Vehicle.getLeader(id).getFirst(),
-                Vehicle.getLeader(id).getSecond()
-            ))
+        return results.entrySet().stream().parallel()
+            .map(entry -> {
+                // create a new map without the nasty TraCIResult type as value
+                Map<Integer, String> properties = entry.getValue().entrySet().stream().parallel()
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        property -> property.getValue().getString() // get string value of TraCIResult
+                    ));
+
+                // create a VehicleData record from every subscription result
+                return VehicleMapper.createVehicleData(entry.getKey(), properties);
+            })
             .toArray(VehicleData[]::new);
     }
 }
