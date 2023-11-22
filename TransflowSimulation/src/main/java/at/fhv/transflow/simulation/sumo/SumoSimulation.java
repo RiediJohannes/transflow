@@ -13,6 +13,7 @@ import java.util.Iterator;
  */
 public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
     private final SumoStepIterator stepIterator;
+    private final String simName;
 
     /**
      * Instantiates the controller for a new SUMO simulation as defined by the given sumocfg file.
@@ -25,11 +26,23 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
 //        System.loadLibrary("proj_9_0");
         System.loadLibrary("libsumojni");
 
+        // take the name of the config file as this simulation's name (without file extension)
+        this.simName = simulationConfig.getFileName().toString()
+            .replaceFirst("[.][^.]+$", "");
+
         // start the simulation
         Simulation.start(new StringVector(new String[]{"sumo", "-c", simulationConfig.toString()}));
         stepIterator = new SumoStepIterator();
     }
 
+
+    /**
+     * The name of this simulation which is just the name of its config file.
+     * @return The name of the loaded <code>*.sumocgf</code> file without file extension.
+     */
+    public String getName() {
+        return simName;
+    }
 
     /**
      * Execute a given number of steps from the current step in the loaded simulation.

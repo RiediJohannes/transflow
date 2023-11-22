@@ -1,17 +1,11 @@
 package at.fhv.transflow.simulation;
 
 import at.fhv.transflow.simulation.messaging.IMessagingService;
-import at.fhv.transflow.simulation.messaging.JsonMapper;
 import at.fhv.transflow.simulation.messaging.MessagingException;
-import at.fhv.transflow.simulation.messaging.mqtt.ConnectionException;
 import at.fhv.transflow.simulation.messaging.mqtt.MqttService;
+import at.fhv.transflow.simulation.sumo.SumoController;
 import at.fhv.transflow.simulation.sumo.SumoSimulation;
-import at.fhv.transflow.simulation.sumo.SumoStep;
-import at.fhv.transflow.simulation.sumo.data.VehicleData;
-import at.fhv.transflow.simulation.sumo.data.VehicleMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
-import org.eclipse.sumo.libsumo.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,37 +35,19 @@ public class SimLoop {
             // set some additional options for the MQTT connection
             MqttConnectionOptions mqttOptions = new MqttConnectionOptions();
 
+
+            String rootTopic = AppConfig.getProperty("mqtt.topics.root").orElseThrow(() ->
+                new SystemError(ErrorCode.NO_MQTT_ROOT_TOPIC));
+            String metricsTopic = AppConfig.getProperty("mqtt.topics.metrics").orElseThrow(() ->
+                new SystemError(ErrorCode.NO_MQTT_METRICS_TOPIC));
+
             try (SumoSimulation simulation = new SumoSimulation(simConfig);
                  IMessagingService mqtt = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
 
-                for (SumoStep step : simulation) {
-                    // debug info
-                    System.out.println("Step: " + step.getId());
-                    System.out.println("NumVehicles: " + step.getVehicleCount());
+                // load the simulation and run it while continuously sending simulation metrics to the given messaging service
+                SumoController simController = new SumoController(simulation, mqtt);
+                simController.runSimulation(rootTopic, metricsTopic);
 
-                    // subscribe to all properties of interest for every freshly loaded vehicle
-                    for (String newVehicleId : Simulation.getLoadedIDList()) {
-                        Vehicle.subscribe(newVehicleId, new IntVector(VehicleMapper.Fields.sumoProperties()));
-                        Vehicle.subscribeLeader(newVehicleId, 200.0); // leader can only be subscribed via this method
-                    }
-
-                    VehicleData[] vehicleData = step.getVehicleData();
-
-                    if (vehicleData.length > 0) {
-                        try {
-                            String json = JsonMapper.instance().toJsonString(vehicleData);
-                            VehicleData[] veh = JsonMapper.instance().fromJson(json, VehicleData[].class);
-
-//                            mqtt.sendMessage("sim/0/data", JsonMapper.instance().toJsonBytes(vehicleData), 1);
-                        } catch (JsonProcessingException exp) {
-                            System.err.printf("Failed to parse objects in time step %s;\nReason: %s\n",
-                                step.getId(), exp.getMessage());
-                        }
-//                        } catch (ConnectionException exp) {
-//                            System.err.printf(exp.getMessage());
-//                        }
-                    }
-                }
             } catch (MessagingException exp) {
                 throw new SystemError(ErrorCode.MESSAGING_SERVICE_UNREACHABLE,
                     "Failed to establish a connection to the specified MQTT broker! Connection URL: '" + mqttBroker + "'");

@@ -5,6 +5,8 @@ public enum ErrorCode {
     NO_SIM_PATH(101, "Missing property 'sim.path' in application properties!\nThe file path of a *.sumocfg file is required to start a SUMO simulation."),
     NO_MQTT_BROKER_URL(102, "Missing property 'mqtt.brokerUrl' in application properties!\nA valid URL to an MQTT broker is required to publish simulation data."),
     NO_MQTT_CLIENT_ID(103, "Missing property 'mqtt.clientId' in application properties!\nA valid client ID for the MQTT client is required to publish simulation data to the MQTT broker."),
+    NO_MQTT_ROOT_TOPIC(104, "Missing property 'mqtt.topics.root' in application properties!\nA valid root topic which all messages should go to is required to publish simulation data to the MQTT broker."),
+    NO_MQTT_METRICS_TOPIC(105, "Missing property 'mqtt.topics.metrics' in application properties!\nA valid subordinate topic for simulation metrics is required to publish simulation data to the MQTT broker."),
     MESSAGING_SERVICE_UNREACHABLE(200, "Failed to establish a connection to the messaging service required to publish simulation data!");
 
 
