@@ -1,5 +1,6 @@
-package at.fhv.transflow.simulation.sumo.data;
+package at.fhv.transflow.simulation.sumo.mapping;
 
+import at.fhv.transflow.simulation.sumo.data.VehicleData;
 import org.eclipse.sumo.libsumo.Constants;
 
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 
 public abstract class VehicleMapper {
     // ID of the leader property which cannot be subscribed by the normal subscribe method

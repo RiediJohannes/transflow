@@ -4,7 +4,7 @@ import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.JsonMapper;
 import at.fhv.transflow.simulation.messaging.MessagingException;
 import at.fhv.transflow.simulation.sumo.data.VehicleData;
-import at.fhv.transflow.simulation.sumo.data.VehicleMapper;
+import at.fhv.transflow.simulation.sumo.mapping.VehicleMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.sumo.libsumo.IntVector;
 import org.eclipse.sumo.libsumo.Simulation;

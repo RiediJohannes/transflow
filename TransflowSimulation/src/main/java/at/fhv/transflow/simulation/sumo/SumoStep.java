@@ -1,7 +1,7 @@
 package at.fhv.transflow.simulation.sumo;
 
 import at.fhv.transflow.simulation.sumo.data.VehicleData;
-import at.fhv.transflow.simulation.sumo.data.VehicleMapper;
+import at.fhv.transflow.simulation.sumo.mapping.VehicleMapper;
 import org.eclipse.sumo.libsumo.SubscriptionResults;
 import org.eclipse.sumo.libsumo.Vehicle;
 

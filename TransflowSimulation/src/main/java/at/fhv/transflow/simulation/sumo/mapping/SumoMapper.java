@@ -1,4 +1,4 @@
-package at.fhv.transflow.simulation.sumo.data;
+package at.fhv.transflow.simulation.sumo.mapping;
 
 import at.fhv.transflow.simulation.messaging.JsonMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
