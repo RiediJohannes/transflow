@@ -12,6 +12,8 @@ import org.eclipse.sumo.libsumo.Vehicle;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class SumoController {
@@ -48,7 +50,7 @@ public class SumoController {
 
     public void runSimulation(String rootTopic, String subTopic) {
         startTime = LocalDateTime.now();
-        String simId = getId();
+        String topic = rootTopic + "/" + getId() + "/" + subTopic;
 
         for (SumoStep step : simulation) {
             // debug info
@@ -61,20 +63,20 @@ public class SumoController {
                 Vehicle.subscribeLeader(newVehicleId, 200.0); // leader can only be subscribed via this method
             }
 
+            // collect metrics
+            Map<String, Object> metrics = new HashMap<>();
+
             VehicleData[] vehicleData = step.getVehicleData();
+            metrics.put("vehicles", vehicleData);
 
-            if (vehicleData.length > 0) {
-                try {
-                    byte[] jsonPayload = JsonMapper.instance().toJsonBytes(vehicleData);
-
-                    String topic = rootTopic + "/" + simId + "/" + subTopic;
-                    messagingService.sendMessage(topic, jsonPayload, 1);
-                } catch (JsonProcessingException exp) {
-                    System.err.printf("Failed to parse objects in time step %s;\nReason: %s\n",
-                        step.getId(), exp.getMessage());
-                } catch (MessagingException exp) {
-                    System.err.printf(exp.getMessage());
-                }
+            try {
+                byte[] jsonPayload = JsonMapper.instance().toJsonBytes(metrics);
+                messagingService.sendMessage(topic, jsonPayload, 1);
+            } catch (JsonProcessingException exp) {
+                System.err.printf("Failed to parse objects in time step %s;\nReason: %s\n",
+                    step.getId(), exp.getMessage());
+            } catch (MessagingException exp) {
+                System.err.printf(exp.getMessage());
             }
         }
     }

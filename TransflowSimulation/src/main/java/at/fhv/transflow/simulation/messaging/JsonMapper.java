@@ -39,4 +39,9 @@ public class JsonMapper {
     public <T> T fromJson(String json, Class<T> valueType) throws JsonProcessingException {
         return mapper.readValue(json, valueType);
     }
+
+    public String prettyPrint(String json) throws JsonProcessingException {
+        Object jsonObject = mapper.readValue(json, Object.class);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+    }
 }
