@@ -2,6 +2,7 @@ package at.fhv.transflow.simulation.sumo.data;
 
 import java.util.Objects;
 
+
 /**
  * DTO for all data points of interest for a single road network edge at a given simulation step.
  */
@@ -10,7 +11,6 @@ public record EdgeData(
     String id,
     Integer laneCount,
     String streetName,
-    Double startToEndAngle,
     // fields
     Double sumCo2MgPerSecond,
     Double sumCoMgPerSecond,

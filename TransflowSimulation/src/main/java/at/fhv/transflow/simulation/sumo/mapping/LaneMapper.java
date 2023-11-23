@@ -42,7 +42,6 @@ public abstract class LaneMapper {
         SUM_WAITING_TIME(Constants.VAR_WAITING_TIME),
         CURRENT_TRAVEL_DURATION(Constants.VAR_CURRENT_TRAVELTIME),
         HALTING_VEHICLES_COUNT(Constants.LAST_STEP_VEHICLE_HALTING_NUMBER),
-        START_TO_END_ANGLE(Constants.VAR_ANGLE),
         LINKS(Constants.LANE_LINKS);
 
 
@@ -121,7 +120,6 @@ public abstract class LaneMapper {
             SumoMapper.tryParseDouble(props.get(Fields.SUM_WAITING_TIME.sumoPropertyId)),
             SumoMapper.tryParseDouble(props.get(Fields.CURRENT_TRAVEL_DURATION.sumoPropertyId)),
             SumoMapper.tryParseInteger(props.get(Fields.HALTING_VEHICLES_COUNT.sumoPropertyId)),
-            SumoMapper.tryParseDouble(props.get(Fields.START_TO_END_ANGLE.sumoPropertyId)),
             SumoMapper.parseTraCIList(props.get(ExtraFields.LANE_CHANGE_ALLOWED_LEFT.id)),
             SumoMapper.parseTraCIList(props.get(ExtraFields.LANE_CHANGE_ALLOWED_RIGHT.id)),
             parsedLinks

@@ -32,7 +32,6 @@ public record LaneData(
     Double sumWaitingTime,
     Double currentTravelDuration,
     Integer haltingVehiclesCount,
-    Double startToEndAngle,
     String[] laneChangeAllowedLeft,
     String[] laneChangeAllowedRight,
     List<Link> links

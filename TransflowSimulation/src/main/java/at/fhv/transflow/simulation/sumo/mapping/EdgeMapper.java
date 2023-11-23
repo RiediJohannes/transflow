@@ -19,7 +19,7 @@ public abstract class EdgeMapper {
     public enum Fields {
         LANE_COUNT(Constants.VAR_LANE_INDEX),
         STREET_NAME(Constants.VAR_NAME),
-        CURRENT_TRAVEL_DURATION(Constants.VAR_EDGE_TRAVELTIME),
+        CURRENT_TRAVEL_DURATION(Constants.VAR_CURRENT_TRAVELTIME),
         SUM_CO2_MG_PER_SECOND(Constants.VAR_CO2EMISSION),
         SUM_CO_MG_PER_SECOND(Constants.VAR_COEMISSION),
         SUM_HC_MG_PER_SECOND(Constants.VAR_HCEMISSION),
@@ -32,11 +32,10 @@ public abstract class EdgeMapper {
         VEHICLE_IDS(Constants.LAST_STEP_VEHICLE_ID_LIST),
         TIME_OCCUPANCY_PERCENTAGE(Constants.LAST_STEP_OCCUPANCY),
         MEAN_VEHICLE_SPEED(Constants.LAST_STEP_MEAN_SPEED),
-        MEAN_VEHICLE_LENGTH(Constants.VAR_LENGTH),
+        MEAN_VEHICLE_LENGTH(Constants.LAST_STEP_LENGTH),
         SUM_WAITING_TIME(Constants.VAR_WAITING_TIME),
         PERSON_IDS(Constants.LAST_STEP_PERSON_ID_LIST),
-        HALTING_VEHICLES_COUNT(Constants.LAST_STEP_VEHICLE_HALTING_NUMBER),
-        START_TO_END_ANGLE(Constants.VAR_ANGLE);
+        HALTING_VEHICLES_COUNT(Constants.LAST_STEP_VEHICLE_HALTING_NUMBER);
 
 
         public final int sumoPropertyId;
@@ -67,7 +66,6 @@ public abstract class EdgeMapper {
         return new EdgeData(edgeId,
             SumoMapper.tryParseInteger(props.get(Fields.LANE_COUNT.sumoPropertyId)),
             props.get(Fields.STREET_NAME.sumoPropertyId),
-            SumoMapper.tryParseDouble(props.get(Fields.START_TO_END_ANGLE.sumoPropertyId)),
             SumoMapper.tryParseDouble(props.get(Fields.SUM_CO2_MG_PER_SECOND.sumoPropertyId)),
             SumoMapper.tryParseDouble(props.get(Fields.SUM_CO_MG_PER_SECOND.sumoPropertyId)),
             SumoMapper.tryParseDouble(props.get(Fields.SUM_HC_MG_PER_SECOND.sumoPropertyId)),
