@@ -55,7 +55,7 @@ public abstract class EdgeMapper {
                 .collect(Collectors.toSet());
         }
     }
-    
+
 
     public static EdgeData createEdgeData(String edgeId, Map<Integer, String> props) {
         String[] vehicleIds = SumoMapper.parseTraCIList(props.get(Fields.VEHICLE_IDS.sumoPropertyId));

@@ -3,9 +3,10 @@ package at.fhv.transflow.simulation.sumo;
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.JsonMapper;
 import at.fhv.transflow.simulation.messaging.MessagingException;
-import at.fhv.transflow.simulation.sumo.data.VehicleData;
+import at.fhv.transflow.simulation.sumo.mapping.EdgeMapper;
 import at.fhv.transflow.simulation.sumo.mapping.VehicleMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.eclipse.sumo.libsumo.Edge;
 import org.eclipse.sumo.libsumo.IntVector;
 import org.eclipse.sumo.libsumo.Simulation;
 import org.eclipse.sumo.libsumo.Vehicle;
@@ -52,6 +53,9 @@ public class SumoController {
         startTime = LocalDateTime.now();
         String topic = rootTopic + "/" + getId() + "/" + subTopic;
 
+        // subscribe to all properties of interest for every edge (road connection) in the simulation
+        Edge.getIDList().forEach(edge -> Edge.subscribe(edge, new IntVector(EdgeMapper.Fields.sumoProperties())));
+
         for (SumoStep step : simulation) {
             // debug info
             System.out.println("Step: " + step.getId());
@@ -65,9 +69,8 @@ public class SumoController {
 
             // collect metrics
             Map<String, Object> metrics = new HashMap<>();
-
-            VehicleData[] vehicleData = step.getVehicleData();
-            metrics.put("vehicles", vehicleData);
+            metrics.put("vehicles", step.getVehicleData());
+            metrics.put("edges", step.getEdgeData());
 
             try {
                 byte[] jsonPayload = JsonMapper.instance().toJsonBytes(metrics);
