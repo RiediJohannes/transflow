@@ -1,16 +1,16 @@
 package at.fhv.transflow.simulation.sumo;
 
 import at.fhv.transflow.simulation.sumo.data.EdgeData;
+import at.fhv.transflow.simulation.sumo.data.RouteData;
 import at.fhv.transflow.simulation.sumo.data.VehicleData;
 import at.fhv.transflow.simulation.sumo.mapping.EdgeMapper;
+import at.fhv.transflow.simulation.sumo.mapping.RouteMapper;
 import at.fhv.transflow.simulation.sumo.mapping.VehicleMapper;
-import org.eclipse.sumo.libsumo.Edge;
-import org.eclipse.sumo.libsumo.SubscriptionResults;
-import org.eclipse.sumo.libsumo.TraCIResults;
-import org.eclipse.sumo.libsumo.Vehicle;
+import org.eclipse.sumo.libsumo.*;
 
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 /**
  * Represents a single time step of a running SUMO traffic simulation. Provides a simple API to query previously subscribed
@@ -56,6 +56,18 @@ public class SumoStep {
             })
             .toArray(EdgeData[]::new);
     }
+
+    public RouteData[] getRouteData() {
+        SubscriptionResults allResults = Route.getAllSubscriptionResults();
+
+        return allResults.entrySet().stream().parallel()
+            .map(resultsPerId -> {
+                Map<Integer, String> properties = extractPropertyMap(resultsPerId);
+                return RouteMapper.createRouteData(resultsPerId.getKey(), properties);
+            })
+            .toArray(RouteData[]::new);
+    }
+
 
     /**
      * Takes in a single {@link Map.Entry} of {@link TraCIResults} as the value (containing the subscription
