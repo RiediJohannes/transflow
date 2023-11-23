@@ -2,6 +2,8 @@ package at.fhv.transflow.simulation.sumo.mapping;
 
 import org.eclipse.sumo.libsumo.TraCIColor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -48,6 +50,22 @@ public abstract class SumoMapper {
         return traciList
             .replaceAll("[\\[\\]]", "")
             .split(",");
+    }
+
+    public static List<Double[]> parseShapeList(String shapeList) {
+        if (shapeList == null) return null;
+
+        if ("[]".equals(shapeList.strip())) return new ArrayList<>(0);
+
+        Pattern pattern = Pattern.compile("(?<=\\()[\\d\\s.,]+(?=\\))");
+        Matcher matcher = pattern.matcher(shapeList);
+
+        // find the position values inside parentheses, split them at every comma and parse the resulting Strings to Doubles
+        return matcher.results()
+            .map(match -> match.group().split(","))
+            .map(list -> Arrays.stream(list)
+                .map(Double::parseDouble).toArray(Double[]::new)
+            ).toList();
     }
 
     /**

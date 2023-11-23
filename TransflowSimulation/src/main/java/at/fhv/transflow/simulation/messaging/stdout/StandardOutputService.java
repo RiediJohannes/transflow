@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class StandardOutputService implements IMessagingService {
+    private int byteCount = 0;
 
     @Override
     public void sendMessage(String topic, byte[] payload, int qos) throws MessagingException {
@@ -19,6 +20,7 @@ public class StandardOutputService implements IMessagingService {
                 JsonMapper.instance().prettyPrint(new String(payload));
 
             System.out.println(output);
+            byteCount += payload.length; // increment the counter of bytes sent
         } catch (JsonProcessingException exp) {
             throw new MalformedPayloadException("Failed to interpret bytes received as JSON!",
                 new String(payload), exp);
@@ -28,5 +30,6 @@ public class StandardOutputService implements IMessagingService {
     @Override
     public void close() {
         System.out.println("--- Messaging service closed ---");
+        System.out.printf("Data sent: %.2f kB\n", byteCount / 1024.0);
     }
 }

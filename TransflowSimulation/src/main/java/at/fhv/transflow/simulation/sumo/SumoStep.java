@@ -1,9 +1,11 @@
 package at.fhv.transflow.simulation.sumo;
 
 import at.fhv.transflow.simulation.sumo.data.EdgeData;
+import at.fhv.transflow.simulation.sumo.data.LaneData;
 import at.fhv.transflow.simulation.sumo.data.RouteData;
 import at.fhv.transflow.simulation.sumo.data.VehicleData;
 import at.fhv.transflow.simulation.sumo.mapping.EdgeMapper;
+import at.fhv.transflow.simulation.sumo.mapping.LaneMapper;
 import at.fhv.transflow.simulation.sumo.mapping.RouteMapper;
 import at.fhv.transflow.simulation.sumo.mapping.VehicleMapper;
 import org.eclipse.sumo.libsumo.*;
@@ -66,6 +68,26 @@ public class SumoStep {
                 return RouteMapper.createRouteData(resultsPerId.getKey(), properties);
             })
             .toArray(RouteData[]::new);
+    }
+
+    public LaneData[] getLaneData() {
+        SubscriptionResults allResults = Lane.getAllSubscriptionResults();
+
+        return allResults.entrySet().stream().parallel()
+            .map(resultsPerId -> {
+                Map<Integer, String> properties = extractPropertyMap(resultsPerId);
+
+                // add some extra values that cannot be subscribed
+                StringVector laneChangePermsLeft = Lane.getChangePermissions(resultsPerId.getKey(), Constants.LANECHANGE_LEFT);
+                StringVector laneChangePermsRight = Lane.getChangePermissions(resultsPerId.getKey(), Constants.LANECHANGE_RIGHT);
+                properties.put(LaneMapper.ExtraFields.LANE_CHANGE_ALLOWED_LEFT.id, laneChangePermsLeft.toString());
+                properties.put(LaneMapper.ExtraFields.LANE_CHANGE_ALLOWED_RIGHT.id, laneChangePermsRight.toString());
+
+                TraCIConnectionVector links = Lane.getLinks(resultsPerId.getKey());
+
+                return LaneMapper.createLaneData(resultsPerId.getKey(), properties, links);
+            })
+            .toArray(LaneData[]::new);
     }
 
 
