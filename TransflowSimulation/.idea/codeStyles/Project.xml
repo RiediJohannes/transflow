@@ -4,6 +4,7 @@
       <option name="JD_ADD_BLANK_AFTER_DESCRIPTION" value="false" />
     </JavaCodeStyleSettings>
     <codeStyleSettings language="JAVA">
+      <option name="BLANK_LINES_AFTER_IMPORTS" value="2" />
       <indentOptions>
         <option name="CONTINUATION_INDENT_SIZE" value="4" />
       </indentOptions>

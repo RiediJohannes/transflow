@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 public abstract class EdgeMapper {
     /**
      * Inner enum of all the fields (properties) of a {@link EdgeData} record. Each enum constant
@@ -58,6 +59,8 @@ public abstract class EdgeMapper {
 
 
     public static EdgeData createEdgeData(String edgeId, Map<Integer, String> props) {
+        if (edgeId == null || props == null) return null;
+
         String[] vehicleIds = SumoMapper.parseTraCIList(props.get(Fields.VEHICLE_IDS.sumoPropertyId));
         String[] personIds = SumoMapper.parseTraCIList(props.get(Fields.PERSON_IDS.sumoPropertyId));
 

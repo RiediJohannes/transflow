@@ -2,6 +2,7 @@ package at.fhv.transflow.simulation.sumo.data;
 
 import java.util.Objects;
 
+
 /**
  * DTO for all data points of interest for a single vehicle at a given simulation step.
  */

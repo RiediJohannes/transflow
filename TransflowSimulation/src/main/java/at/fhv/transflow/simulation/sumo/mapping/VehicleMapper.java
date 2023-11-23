@@ -84,6 +84,8 @@ public abstract class VehicleMapper {
     }
 
     public static VehicleData createVehicleData(String vehicleId, Map<Integer, String> props) {
+        if (vehicleId == null || props == null) return null;
+
         // parse the values of the leader subscription
         Leader leader = VehicleMapper.parseLeader(props.get(VehicleMapper.LEADER_PROPERTY));
         // parse the list of riding person IDs
