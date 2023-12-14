@@ -1,5 +1,6 @@
 package at.fhv.transflow.simulation.sumo.mapping;
 
+import at.fhv.transflow.simulation.sumo.data.Position;
 import org.eclipse.sumo.libsumo.TraCIColor;
 
 import java.util.ArrayList;
@@ -26,10 +27,12 @@ public abstract class SumoMapper {
     public static String hexColorFromTraCI(String traciColorString) {
         if (traciColorString == null) return null;
 
-        Pattern pattern = Pattern.compile("(?<=[(,\\s])\\d+(?=[,)\\s])");
-        Matcher matcher = pattern.matcher(traciColorString);
+        List<String> matches = Pattern.compile("(?<=[(,\\s])\\d+(?=[,)\\s])")
+            .matcher(traciColorString)
+            .results()
+            .map(MatchResult::group)
+            .toList();
 
-        List<String> matches = matcher.results().map(MatchResult::group).toList();
         if (matches.size() == 4) {
             return String.format("#%02x%02x%02x%02x",
                 Integer.parseInt(matches.get(0)),
@@ -50,6 +53,19 @@ public abstract class SumoMapper {
         return traciList
             .replaceAll("[\\[\\]]", "")
             .split(",");
+    }
+
+    public static Position parsePosition(String traciPosition) {
+        if (traciPosition == null) return new Position();
+
+        List<Double> coordinateList = Pattern.compile("[-\\d]+")
+            .matcher(traciPosition)
+            .results()
+            .map(MatchResult::group)
+            .map(Double::valueOf)
+            .toList();
+
+        return new Position(coordinateList);
     }
 
     public static List<Double[]> parseShapeList(String shapeList) {

@@ -1,13 +1,7 @@
 package at.fhv.transflow.simulation.sumo;
 
-import at.fhv.transflow.simulation.sumo.data.EdgeData;
-import at.fhv.transflow.simulation.sumo.data.LaneData;
-import at.fhv.transflow.simulation.sumo.data.RouteData;
-import at.fhv.transflow.simulation.sumo.data.VehicleData;
-import at.fhv.transflow.simulation.sumo.mapping.EdgeMapper;
-import at.fhv.transflow.simulation.sumo.mapping.LaneMapper;
-import at.fhv.transflow.simulation.sumo.mapping.RouteMapper;
-import at.fhv.transflow.simulation.sumo.mapping.VehicleMapper;
+import at.fhv.transflow.simulation.sumo.data.*;
+import at.fhv.transflow.simulation.sumo.mapping.*;
 import org.eclipse.sumo.libsumo.*;
 
 import java.util.Map;
@@ -88,6 +82,17 @@ public class SumoStep {
                 return LaneMapper.createLaneData(resultsPerId.getKey(), properties, links);
             })
             .toArray(LaneData[]::new);
+    }
+
+    public JunctionData[] getJunctionData() {
+        SubscriptionResults allResults = Junction.getAllSubscriptionResults();
+
+        return allResults.entrySet().stream().parallel()
+            .map(resultsPerId -> {
+                Map<Integer, String> properties = extractPropertyMap(resultsPerId);
+                return JunctionMapper.createJunctionData(resultsPerId.getKey(), properties);
+            })
+            .toArray(JunctionData[]::new);
     }
 
 
