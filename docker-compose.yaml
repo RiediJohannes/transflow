@@ -12,7 +12,9 @@ services:
       - "8084:8084"
       - "8883:8883"
     volumes:
-      - emqx-data:/opt/emqx
+      - emqx-data:/opt/emqx/data
+      - emqx-etc:/opt/emqx/etc
+      - emqx-log:/opt/emqx/log
     networks:  
       transflow:
         aliases:
@@ -20,12 +22,12 @@ services:
     env_file:
       - docker/runtime.env
     healthcheck:
-      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"] # check if EMQX is fully initialized (may take around 3 minutes)
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"] # check if EMQX is fully initialized
       interval: 30s  # time between the completion of the last check and the next health check
-      timeout: 100s   # maximum time for a check to complet (for some reason emqx ctl status regurarly takes upwards of 50s)
-      start_period: 300s  # failing checks during this time will not be counted towards the max retries -> give container time to startup
-      start_interval: 10s # time between health checks during startup period
-      retries: 2  # number of failing checks to be counted as unhealthy
+      timeout: 10s   # maximum time for a check to complete
+      start_period: 60s  # failing checks during this time will not be counted towards the max retries -> give container time to startup
+      start_interval: 2.5s # time between health checks during startup period
+      retries: 3  # number of failing checks to be counted as unhealthy
 
   influx-db:
     image: influxdb:2.7.1
@@ -46,8 +48,6 @@ services:
   telegraf:
     image: telegraf:latest
     container_name: transflow-telegraf
-    # wait for the MQTT service to fully initialize (setup its listener on port 1883) before starting telegraf
-    # command: /etc/telegraf/wait-for-it.sh -t 0 transflow-mqtt:1883 -- telegraf
     ports:
       - "8092:8092"
       - "8094:8094"
@@ -71,7 +71,19 @@ volumes:
     driver_opts:
       o: bind
       type: none
-      device: ./docker/data/emqx
+      device: ./docker/data/emqx/data
+  emqx-etc:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./docker/data/emqx/etc
+  emqx-log:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./docker/data/emqx/log
 
   influx-config:
     driver: local
