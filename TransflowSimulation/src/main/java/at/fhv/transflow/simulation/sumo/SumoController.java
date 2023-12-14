@@ -51,6 +51,7 @@ public class SumoController {
         String topic = rootTopic + "/" + getId() + "/" + subTopic;
 
         // subscribe to all properties of interest for every edge (road connection) in the simulation
+        VehicleType.getIDList().forEach(type -> VehicleType.subscribe(type, new IntVector(VehicleTypeMapper.Fields.sumoProperties())));
         Edge.getIDList().forEach(edge -> Edge.subscribe(edge, new IntVector(EdgeMapper.Fields.sumoProperties())));
         Route.getIDList().forEach(route -> Route.subscribe(route, new IntVector(RouteMapper.Fields.sumoProperties())));
         Lane.getIDList().forEach(lane -> Lane.subscribe(lane, new IntVector(LaneMapper.Fields.sumoProperties())));
@@ -70,6 +71,7 @@ public class SumoController {
             // collect metrics
             Map<String, Object> metrics = new HashMap<>();
             metrics.put("vehicles", step.getVehicleData());
+            metrics.put("vehicleTypes", step.getVehicleTypeData());
             metrics.put("lanes", step.getLaneData());
             metrics.put("edges", step.getEdgeData());
             metrics.put("routes", step.getRouteData());

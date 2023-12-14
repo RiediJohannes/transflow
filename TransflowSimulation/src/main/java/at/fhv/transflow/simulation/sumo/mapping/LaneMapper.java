@@ -63,6 +63,9 @@ public abstract class LaneMapper {
         }
     }
 
+    /*
+     * Some properties of a SUMO lane object that cannot be subscribed
+     */
     public enum ExtraFields {
         LANE_CHANGE_ALLOWED_LEFT(-1),
         LANE_CHANGE_ALLOWED_RIGHT(-2);

@@ -6,6 +6,8 @@
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <!-- Routes -->
     <route id="R1" edges="E1 E2 E3 E4b E5"/>
+
+    <vType id="testType" accel="2.6" decel="4.5" sigma="0.5" length="5" maxSpeed="70" impatience="1.0"/>
     <!-- Vehicles, persons and containers (sorted by depart) -->
-    <vehicle id="C1" depart="0.00" color="red" route="R1"/>
+    <vehicle id="C1" type="testType" depart="0.00" color="red" route="R1"/>
 </routes>

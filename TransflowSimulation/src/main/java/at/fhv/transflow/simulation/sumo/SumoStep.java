@@ -42,6 +42,17 @@ public class SumoStep {
             .toArray(VehicleData[]::new);
     }
 
+    public VehicleTypeData[] getVehicleTypeData() {
+        SubscriptionResults allResults = VehicleType.getAllSubscriptionResults();
+
+        return allResults.entrySet().stream().parallel()
+            .map(resultsPerId -> {
+                Map<Integer, String> properties = extractPropertyMap(resultsPerId);
+                return VehicleTypeMapper.createVehicleData(resultsPerId.getKey(), properties);
+            })
+            .toArray(VehicleTypeData[]::new);
+    }
+
     public EdgeData[] getEdgeData() {
         SubscriptionResults allResults = Edge.getAllSubscriptionResults();
 
