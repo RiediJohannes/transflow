@@ -7,9 +7,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class StandardOutputService implements IMessagingService {
-    private int byteCount = 0;
+    private static final AtomicInteger BYTE_COUNT = new AtomicInteger(0);
 
     @Override
     public void sendMessage(String topic, byte[] payload, int qos) throws MessagingException {
@@ -20,7 +22,7 @@ public class StandardOutputService implements IMessagingService {
                 JsonMapper.instance().prettyPrint(new String(payload));
 
             System.out.println(output);
-            byteCount += payload.length; // increment the counter of bytes sent
+            BYTE_COUNT.addAndGet(payload.length); // increment the counter of bytes sent
         } catch (JsonProcessingException exp) {
             throw new MalformedPayloadException("Failed to interpret bytes received as JSON!",
                 new String(payload), exp);
@@ -30,6 +32,6 @@ public class StandardOutputService implements IMessagingService {
     @Override
     public void close() {
         System.out.println("--- Messaging service closed ---");
-        System.out.printf("Data sent: %.2f kB\n", byteCount / 1024.0);
+        System.out.printf("Data sent: %.2f kB\n", BYTE_COUNT.get() / 1024.0);
     }
 }
