@@ -33,7 +33,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'at.fhv.transflow.simulation.SimLoop'
+    mainClass = 'at.fhv.transflow.simulation.RunSim'
 }
 
 test {
