@@ -31,7 +31,7 @@ public record VehicleTypeData(
     Double actionStepLength,
     Integer personCapacity,
     Double boardingDuration
-) {
+) implements SumoObject {
     public VehicleTypeData {
         Objects.requireNonNull(id);
     }

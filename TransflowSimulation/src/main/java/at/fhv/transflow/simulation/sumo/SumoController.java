@@ -3,14 +3,14 @@ package at.fhv.transflow.simulation.sumo;
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.JsonMapper;
 import at.fhv.transflow.simulation.messaging.MessagingException;
+import at.fhv.transflow.simulation.sumo.data.SumoObject;
 import at.fhv.transflow.simulation.sumo.mapping.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.sumo.libsumo.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -70,7 +70,7 @@ public class SumoController {
             }
 
             // collect metrics
-            Map<String, Object> topicMap = new HashMap<>();
+            Map<String, List<? extends SumoObject>> topicMap = new HashMap<>();
             topicMap.put("vehicles", step.getVehicleData());
             topicMap.put("vehicle_types", step.getVehicleTypeData());
             topicMap.put("lanes", step.getLaneData());
@@ -78,17 +78,25 @@ public class SumoController {
             topicMap.put("routes", step.getRouteData());
             topicMap.put("junctions", step.getJunctionData());
 
-            topicMap.forEach((categoryTopic, payload) -> {
-                try {
-                    final String topic = metricsTopic + "/" + categoryTopic +  "/" + step.getId();
-                    byte[] jsonPayload = JsonMapper.instance().toJsonBytes(payload);
-                    messagingService.sendMessage(topic, jsonPayload, 1);
-                } catch (JsonProcessingException exp) {
-                    System.err.printf("Failed to parse objects in time step %s;\nReason: %s\n",
-                        step.getId(), exp.getMessage());
-                } catch (MessagingException exp) {
-                    System.err.printf(exp.getMessage());
-                }
+            topicMap.forEach((domainTopic, metrics) -> {
+                // message topic included the domain-related topic name as well as the current simulation time step
+                final String topic = metricsTopic + "/" + domainTopic + "/" + step.getId();
+
+                metrics.stream().parallel().forEach(payload -> {
+                    try {
+                        // serialize a single SumoObject to JSON and send it via the messaging service
+                        byte[] jsonPayload = JsonMapper.instance().toJsonBytes(payload);
+                        messagingService.sendMessage(topic, jsonPayload, 1);
+
+                    } catch (JsonProcessingException exp) {
+                        System.err.printf("""
+                        Failed to parse object with ID %s of domain %s in time step %s;
+                        Reason: %s
+                        """, payload.id(), domainTopic, step.getId(), exp.getMessage());
+                    } catch (MessagingException exp) {
+                        System.err.printf(exp.getMessage());
+                    }
+                });
             });
         }
     }

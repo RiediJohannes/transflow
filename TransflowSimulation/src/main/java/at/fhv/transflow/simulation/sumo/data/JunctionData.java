@@ -12,7 +12,7 @@ public record JunctionData(
     String id,
     Position position,
     List<Double[]> shape
-) {
+) implements SumoObject {
     public JunctionData {
         Objects.requireNonNull(id);
     }
