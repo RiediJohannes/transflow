@@ -62,10 +62,10 @@ public class SumoController {
         Junction.getIDList().forEach(junction -> Junction.subscribe(junction, new IntVector(JunctionMapper.Fields.sumoProperties())));
 
         try (AwaitableExecutor executor = new AwaitableExecutor(Executors.newFixedThreadPool(THREAD_POOL_SIZE))) {
-            List<Long> durations = new ArrayList<>(50);
             for (SumoStep step : simulation) {
                 // debug info
-                System.out.println("Step: " + step.getId());
+                System.out.println("\n\nStep: " + step.getId());
+                executor.reset();
 
                 // subscribe to all properties of interest for every freshly loaded vehicle
                 for (String newVehicleId : Simulation.getLoadedIDList()) {

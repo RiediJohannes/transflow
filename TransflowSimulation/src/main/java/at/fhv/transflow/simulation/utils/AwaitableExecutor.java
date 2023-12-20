@@ -20,6 +20,7 @@ public class AwaitableExecutor implements AutoCloseable {
     private final AtomicInteger counter = new AtomicInteger(0);
     private final Lock lock = new ReentrantLock();
     private final Condition allTasksCompleted;
+    private boolean started = false;
 
     public AwaitableExecutor(ExecutorService executor) {
         this.executor = executor;
@@ -28,6 +29,8 @@ public class AwaitableExecutor implements AutoCloseable {
 
     public void execute(Runnable task) {
         counter.incrementAndGet();
+        started = true;
+
         executor.execute(() -> {
             task.run();
             decrementCounter();
@@ -43,7 +46,9 @@ public class AwaitableExecutor implements AutoCloseable {
     public void awaitCompletion() throws InterruptedException {
         lock.lock();
         try {
-            allTasksCompleted.await();
+            while (!started || counter.get() > 0) {
+                allTasksCompleted.await();
+            }
         } finally {
             lock.unlock();
         }
@@ -52,12 +57,17 @@ public class AwaitableExecutor implements AutoCloseable {
     private void decrementCounter() {
         lock.lock();
         try {
-            if (counter.decrementAndGet() <= 0) {
+            if (started && counter.decrementAndGet() <= 0) {
                 allTasksCompleted.signalAll();
             }
         } finally {
             lock.unlock();
         }
+    }
+
+    public void reset() {
+        counter.set(0);
+        started = false;
     }
 
     @Override
