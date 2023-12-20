@@ -1,10 +1,13 @@
 package at.fhv.transflow.simulation.sumo;
 
+import at.fhv.transflow.simulation.ErrorCode;
+import at.fhv.transflow.simulation.SystemError;
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.JsonMapper;
 import at.fhv.transflow.simulation.messaging.MessagingException;
 import at.fhv.transflow.simulation.sumo.data.SumoObject;
 import at.fhv.transflow.simulation.sumo.mapping.*;
+import at.fhv.transflow.simulation.utils.AwaitableExecutor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.sumo.libsumo.*;
 
@@ -13,9 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
 
 public class SumoController {
+    private static final int THREAD_POOL_SIZE = 20;
     private final SumoSimulation simulation;
     private final IMessagingService messagingService;
     private Instant startTime;
@@ -47,7 +52,7 @@ public class SumoController {
             .orElse("ready");
     }
 
-    public void runSimulation(String rootTopic, String subTopic) {
+    public void runSimulation(String rootTopic, String subTopic) throws SystemError {
         startTime = Instant.now();
         String metricsTopic = rootTopic + "/" + getId() + "/" + subTopic;
 
@@ -58,46 +63,53 @@ public class SumoController {
         Lane.getIDList().forEach(lane -> Lane.subscribe(lane, new IntVector(LaneMapper.Fields.sumoProperties())));
         Junction.getIDList().forEach(junction -> Junction.subscribe(junction, new IntVector(JunctionMapper.Fields.sumoProperties())));
 
-        for (SumoStep step : simulation) {
-            // debug info
-            System.out.println("Step: " + step.getId());
-            System.out.println("NumVehicles: " + step.getVehicleCount());
+        try (AwaitableExecutor executor = new AwaitableExecutor(Executors.newFixedThreadPool(THREAD_POOL_SIZE))) {
+            for (SumoStep step : simulation) {
+                // debug info
+                System.out.println("Step: " + step.getId());
 
-            // subscribe to all properties of interest for every freshly loaded vehicle
-            for (String newVehicleId : Simulation.getLoadedIDList()) {
-                Vehicle.subscribe(newVehicleId, new IntVector(VehicleMapper.Fields.sumoProperties()));
-                Vehicle.subscribeLeader(newVehicleId, 200.0); // leader can only be subscribed via this method
-            }
+                // subscribe to all properties of interest for every freshly loaded vehicle
+                for (String newVehicleId : Simulation.getLoadedIDList()) {
+                    Vehicle.subscribe(newVehicleId, new IntVector(VehicleMapper.Fields.sumoProperties()));
+                    Vehicle.subscribeLeader(newVehicleId, 200.0); // leader can only be subscribed via this method
+                }
 
-            // collect metrics
-            Map<String, List<? extends SumoObject>> topicMap = new HashMap<>();
-            topicMap.put("vehicles", step.getVehicleData());
-            topicMap.put("vehicle_types", step.getVehicleTypeData());
-            topicMap.put("lanes", step.getLaneData());
-            topicMap.put("edges", step.getEdgeData());
-            topicMap.put("routes", step.getRouteData());
-            topicMap.put("junctions", step.getJunctionData());
+                // collect metrics
+                Map<String, List<? extends SumoObject>> topicMap = new HashMap<>();
+                topicMap.put("vehicles", step.getVehicleData());
+                topicMap.put("vehicle_types", step.getVehicleTypeData());
+                topicMap.put("lanes", step.getLaneData());
+                topicMap.put("edges", step.getEdgeData());
+                topicMap.put("routes", step.getRouteData());
+                topicMap.put("junctions", step.getJunctionData());
 
-            topicMap.forEach((domainTopic, metrics) -> {
-                // message topic included the domain-related topic name as well as the current simulation time step
-                final String topic = metricsTopic + "/" + domainTopic + "/" + step.getId();
+                topicMap.forEach((domainTopic, metrics) -> {
+                    // message topic included the domain-related topic name as well as the current simulation time step
+                    final String topic = metricsTopic + "/" + domainTopic + "/" + step.getId();
 
-                metrics.stream().parallel().forEach(payload -> {
-                    try {
-                        // serialize a single SumoObject to JSON and send it via the messaging service
-                        byte[] jsonPayload = JsonMapper.instance().toJsonBytes(payload);
-                        messagingService.sendMessage(topic, jsonPayload, 1);
-
-                    } catch (JsonProcessingException exp) {
-                        System.err.printf("""
-                        Failed to parse object with ID %s of domain %s in time step %s;
-                        Reason: %s
-                        """, payload.id(), domainTopic, step.getId(), exp.getMessage());
-                    } catch (MessagingException exp) {
-                        System.err.printf(exp.getMessage());
-                    }
+                    metrics.stream().parallel().forEach(payload ->
+                        executor.execute(() -> {
+                            try {
+                                // serialize a single SumoObject to JSON and send it via the messaging service
+                                byte[] jsonPayload = JsonMapper.instance().toJsonBytes(payload);
+                                messagingService.sendMessage(topic, jsonPayload, 1);
+                            } catch (JsonProcessingException exp) {
+                                System.err.printf("""
+                                    Failed to parse object with ID %s of domain %s in time step %s;
+                                    Reason: %s
+                                    """, payload.id(), domainTopic, step.getId(), exp.getMessage());
+                            } catch (MessagingException exp) {
+                                System.err.println(exp.getMessage());
+                            }
+                        })
+                    );
                 });
-            });
+
+                // wait until every thread spawned in this time step has finished its execution
+                executor.awaitCompletion();
+            }
+        } catch (InterruptedException exp) {
+            throw new SystemError(ErrorCode.EXECUTION_INTERRUPTED);
         }
     }
 }
