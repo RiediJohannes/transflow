@@ -4,9 +4,9 @@ import at.fhv.transflow.simulation.sumo.data.*;
 import at.fhv.transflow.simulation.sumo.mapping.*;
 import org.eclipse.sumo.libsumo.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -32,51 +32,47 @@ public class SumoStep {
         return Vehicle.getIDCount();
     }
 
-    public List<VehicleData> getVehicleData() {
+    public Stream<VehicleData> getVehicleData() {
         SubscriptionResults allResults = Vehicle.getAllSubscriptionResults();
 
         return allResults.entrySet().stream().parallel()
             .map(resultsPerId -> {
                 Map<Integer, String> properties = extractPropertyMap(resultsPerId);
                 return VehicleMapper.createVehicleData(resultsPerId.getKey(), extractPropertyMap(resultsPerId));
-            })
-            .toList();
+            });
     }
 
-    public List<VehicleTypeData> getVehicleTypeData() {
+    public Stream<VehicleTypeData> getVehicleTypeData() {
         SubscriptionResults allResults = VehicleType.getAllSubscriptionResults();
 
         return allResults.entrySet().stream().parallel()
             .map(resultsPerId -> {
                 Map<Integer, String> properties = extractPropertyMap(resultsPerId);
                 return VehicleTypeMapper.createVehicleData(resultsPerId.getKey(), properties);
-            })
-            .toList();
+            });
     }
 
-    public List<EdgeData> getEdgeData() {
+    public Stream<EdgeData> getEdgeData() {
         SubscriptionResults allResults = Edge.getAllSubscriptionResults();
 
         return allResults.entrySet().stream().parallel()
             .map(resultsPerId -> {
                 Map<Integer, String> properties = extractPropertyMap(resultsPerId);
                 return EdgeMapper.createEdgeData(resultsPerId.getKey(), properties);
-            })
-            .toList();
+            });
     }
 
-    public List<RouteData> getRouteData() {
+    public Stream<RouteData> getRouteData() {
         SubscriptionResults allResults = Route.getAllSubscriptionResults();
 
         return allResults.entrySet().stream().parallel()
             .map(resultsPerId -> {
                 Map<Integer, String> properties = extractPropertyMap(resultsPerId);
                 return RouteMapper.createRouteData(resultsPerId.getKey(), properties);
-            })
-            .toList();
+            });
     }
 
-    public List<LaneData> getLaneData() {
+    public Stream<LaneData> getLaneData() {
         SubscriptionResults allResults = Lane.getAllSubscriptionResults();
 
         return allResults.entrySet().stream().parallel()
@@ -92,19 +88,17 @@ public class SumoStep {
                 TraCIConnectionVector links = Lane.getLinks(resultsPerId.getKey());
 
                 return LaneMapper.createLaneData(resultsPerId.getKey(), properties, links);
-            })
-            .toList();
+            });
     }
 
-    public List<JunctionData> getJunctionData() {
+    public Stream<JunctionData> getJunctionData() {
         SubscriptionResults allResults = Junction.getAllSubscriptionResults();
 
         return allResults.entrySet().stream().parallel()
             .map(resultsPerId -> {
                 Map<Integer, String> properties = extractPropertyMap(resultsPerId);
                 return JunctionMapper.createJunctionData(resultsPerId.getKey(), properties);
-            })
-            .toList();
+            });
     }
 
 

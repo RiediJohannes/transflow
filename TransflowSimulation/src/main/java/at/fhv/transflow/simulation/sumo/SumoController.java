@@ -12,11 +12,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.sumo.libsumo.*;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 
 
 public class SumoController {
@@ -64,6 +62,7 @@ public class SumoController {
         Junction.getIDList().forEach(junction -> Junction.subscribe(junction, new IntVector(JunctionMapper.Fields.sumoProperties())));
 
         try (AwaitableExecutor executor = new AwaitableExecutor(Executors.newFixedThreadPool(THREAD_POOL_SIZE))) {
+            List<Long> durations = new ArrayList<>(50);
             for (SumoStep step : simulation) {
                 // debug info
                 System.out.println("Step: " + step.getId());
@@ -75,7 +74,7 @@ public class SumoController {
                 }
 
                 // collect metrics
-                Map<String, List<? extends SumoObject>> topicMap = new HashMap<>();
+                Map<String, Stream<? extends SumoObject>> topicMap = new HashMap<>();
                 topicMap.put("vehicles", step.getVehicleData());
                 topicMap.put("vehicle_types", step.getVehicleTypeData());
                 topicMap.put("lanes", step.getLaneData());
@@ -87,7 +86,7 @@ public class SumoController {
                     // message topic included the domain-related topic name as well as the current simulation time step
                     final String topic = metricsTopic + "/" + domainTopic + "/" + step.getId();
 
-                    metrics.stream().parallel().forEach(payload ->
+                    metrics.parallel().forEach(payload ->
                         executor.execute(() -> {
                             try {
                                 // serialize a single SumoObject to JSON and send it via the messaging service
