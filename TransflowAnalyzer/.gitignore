@@ -1,0 +1,10 @@
+.vs/
+bin/
+obj/
+.vscode/
+**/*.*proj.user
+
+**/node_modules
+**/secrets.dev.yaml
+**/values.dev.yaml
+
