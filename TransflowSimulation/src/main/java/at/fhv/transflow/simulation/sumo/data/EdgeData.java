@@ -29,7 +29,7 @@ public record EdgeData(
     Double currentTravelDuration,
     Integer haltingVehiclesCount,
     Double sumWaitingTime
-) {
+) implements SumoObject {
     public EdgeData {
         Objects.requireNonNull(id);
     }

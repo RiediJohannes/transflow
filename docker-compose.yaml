@@ -39,9 +39,6 @@ services:
       - influx-config:/etc/influxdb2
     networks:
       - transflow
-    depends_on:
-      emqx:
-        condition: service_healthy
     env_file:
       - docker/runtime.env
 
@@ -59,8 +56,11 @@ services:
         aliases:
           - transflow.fhv.at
     depends_on:
+      influx-db:
+        condition: service_started
       emqx:
         condition: service_healthy
+        restart: true
     env_file:
       - docker/runtime.env
 

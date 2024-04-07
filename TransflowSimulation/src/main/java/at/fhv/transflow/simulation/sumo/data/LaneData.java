@@ -35,7 +35,7 @@ public record LaneData(
     String[] laneChangeAllowedLeft,
     String[] laneChangeAllowedRight,
     List<Link> links
-) {
+) implements SumoObject {
     public LaneData {
         Objects.requireNonNull(id);
     }
@@ -49,5 +49,6 @@ public record LaneData(
         String state,
         String direction,
         Double length
-    ) {}
+    ) {
+    }
 }

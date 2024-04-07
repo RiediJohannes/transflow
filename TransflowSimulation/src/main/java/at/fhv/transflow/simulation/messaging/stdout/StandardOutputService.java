@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 
 
 public class StandardOutputService implements IMessagingService {
@@ -21,7 +23,14 @@ public class StandardOutputService implements IMessagingService {
                 "] - Topic:" + topic +
                 JsonMapper.instance().prettyPrint(new String(payload));
 
-            System.out.println(output);
+            String id = Pattern.compile("(?<=\"id\" : \").+(?=\")")
+                .matcher(output)
+                .results()
+                .map(MatchResult::group)
+                .toList()
+                .get(0);
+
+            System.out.println(id);
             BYTE_COUNT.addAndGet(payload.length); // increment the counter of bytes sent
         } catch (JsonProcessingException exp) {
             throw new MalformedPayloadException("Failed to interpret bytes received as JSON!",

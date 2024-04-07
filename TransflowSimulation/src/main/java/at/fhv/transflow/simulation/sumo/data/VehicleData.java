@@ -55,7 +55,7 @@ public record VehicleData(
     Double boardingDuration,
     String leaderVehicleId,
     Double leaderVehicleDistance
-) {
+) implements SumoObject {
     // restrictions for constructor
     public VehicleData {
         Objects.requireNonNull(id);

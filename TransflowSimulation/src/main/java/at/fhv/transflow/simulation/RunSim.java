@@ -2,7 +2,7 @@ package at.fhv.transflow.simulation;
 
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.MessagingException;
-import at.fhv.transflow.simulation.messaging.mqtt.MqttService;
+import at.fhv.transflow.simulation.messaging.stdout.StandardOutputService;
 import at.fhv.transflow.simulation.sumo.SumoController;
 import at.fhv.transflow.simulation.sumo.SumoSimulation;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -43,7 +43,8 @@ public class RunSim {
                 new SystemError(ErrorCode.NO_MQTT_METRICS_TOPIC));
 
             try (SumoSimulation simulation = new SumoSimulation(simConfig);
-                 IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
+//                 IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
+                 IMessagingService messenger = new StandardOutputService()) {
 
                 // load the simulation and run it while continuously sending simulation metrics to the given messaging service
                 SumoController simController = new SumoController(simulation, messenger);
