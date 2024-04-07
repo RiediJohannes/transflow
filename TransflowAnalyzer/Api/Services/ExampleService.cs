@@ -1,12 +1,11 @@
 using Grpc.Core;
-using TransflowAnalyzer;
 
-namespace TransflowAnalyzer.Services
+namespace TransflowAnalyzer.Api.Services
 {
-    public class GreeterService : Greeter.GreeterBase
+    public class ExampleService : Greeter.GreeterBase
     {
-        private readonly ILogger<GreeterService> _logger;
-        public GreeterService(ILogger<GreeterService> logger)
+        private readonly ILogger<ExampleService> _logger;
+        public ExampleService(ILogger<ExampleService> logger)
         {
             _logger = logger;
         }
