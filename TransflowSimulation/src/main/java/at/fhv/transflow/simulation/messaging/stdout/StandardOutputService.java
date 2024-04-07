@@ -14,23 +14,38 @@ import java.util.regex.Pattern;
 
 public class StandardOutputService implements IMessagingService {
     private static final AtomicInteger BYTE_COUNT = new AtomicInteger(0);
+    private final boolean verbose;
+
+    public StandardOutputService() {
+        verbose = false;
+    }
+
+    public StandardOutputService(boolean verbose) {
+        this.verbose = verbose;
+    }
+
 
     @Override
     public void sendMessage(String topic, byte[] payload, int qos) throws MessagingException {
         try {
-            String output = "\n[" +
+            String metaData = "\n[" +
                 LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME) +
-                "] - Topic:" + topic +
-                JsonMapper.instance().prettyPrint(new String(payload));
+                "] - Topic: '" + topic + "'\n";
 
-            String id = Pattern.compile("(?<=\"id\" : \").+(?=\")")
-                .matcher(output)
-                .results()
-                .map(MatchResult::group)
-                .toList()
-                .get(0);
+            String jsonData = JsonMapper.instance().prettyPrint(new String(payload));
+            if (verbose) {
+                System.out.println(metaData + jsonData);
+            } else {
+                String id = Pattern.compile("(?<=\"id\" : \").+(?=\")")
+                    .matcher(jsonData)
+                    .results()
+                    .map(MatchResult::group)
+                    .toList()
+                    .get(0);
 
-            System.out.println(id);
+                System.out.println(metaData + id);
+            }
+
             BYTE_COUNT.addAndGet(payload.length); // increment the counter of bytes sent
         } catch (JsonProcessingException exp) {
             throw new MalformedPayloadException("Failed to interpret bytes received as JSON!",

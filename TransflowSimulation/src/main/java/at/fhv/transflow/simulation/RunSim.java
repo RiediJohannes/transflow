@@ -44,7 +44,7 @@ public class RunSim {
 
             try (SumoSimulation simulation = new SumoSimulation(simConfig);
 //                 IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
-                 IMessagingService messenger = new StandardOutputService()) {
+                 IMessagingService messenger = new StandardOutputService(true)) {
 
                 // load the simulation and run it while continuously sending simulation metrics to the given messaging service
                 SumoController simController = new SumoController(simulation, messenger);
