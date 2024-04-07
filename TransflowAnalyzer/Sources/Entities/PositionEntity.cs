@@ -1,9 +1,9 @@
 ﻿namespace TransflowAnalyzer.Sources.Entities
 {
-    public class PositionEntity
+    public struct PositionEntity
     {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public object Z { get; set; }
+        public double? X { get; set; }
+        public double? Y { get; set; }
+        public double? Z { get; set; }
     }
 }

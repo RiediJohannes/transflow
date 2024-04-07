@@ -2,8 +2,8 @@
 {
     public class JunctionEntity
     {
-        public string Id { get; set; }
-        public PositionEntity Position { get; set; }
-        public object[] Shape { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public PositionEntity? Position { get; set; }
+        public double[] Shape { get; set; } = [];
     }
 }
