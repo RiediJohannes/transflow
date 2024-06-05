@@ -1,4 +1,4 @@
-package at.fhv.transflow.simulation;
+package at.fhv.transflow.simulation.cli;
 
 public enum ErrorCode {
     INVALID_APP_CONFIG(100, "Failed to initialize application config! Please check the location and syntax of your config file."),
@@ -7,6 +7,7 @@ public enum ErrorCode {
     NO_MQTT_CLIENT_ID(103, "Missing property 'mqtt.clientId' in application properties!\nA valid client ID for the MQTT client is required to publish simulation data to the MQTT broker."),
     NO_MQTT_ROOT_TOPIC(104, "Missing property 'mqtt.topics.root' in application properties!\nA valid root topic which all messages should go to is required to publish simulation data to the MQTT broker."),
     NO_MQTT_METRICS_TOPIC(105, "Missing property 'mqtt.topics.metrics' in application properties!\nA valid subordinate topic for simulation metrics is required to publish simulation data to the MQTT broker."),
+    INVALID_CLI_ARGUMENTS(120, "Invalid command line arguments!"),
     MESSAGING_SERVICE_UNREACHABLE(200, "Failed to establish a connection to the messaging service required to publish simulation data!"),
     EXECUTION_INTERRUPTED(500, "Execution of some program tasks were abruptly halted");
 

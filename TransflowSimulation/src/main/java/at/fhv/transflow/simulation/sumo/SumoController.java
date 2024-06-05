@@ -1,7 +1,7 @@
 package at.fhv.transflow.simulation.sumo;
 
-import at.fhv.transflow.simulation.ErrorCode;
-import at.fhv.transflow.simulation.SystemError;
+import at.fhv.transflow.simulation.cli.ErrorCode;
+import at.fhv.transflow.simulation.cli.SystemError;
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.JsonMapper;
 import at.fhv.transflow.simulation.messaging.MessagingException;
@@ -39,7 +39,7 @@ public class SumoController {
     }
 
     /**
-     * A unique ID of the simulation run consisting of it sim config's filename and the timestamp
+     * A unique ID of the simulation run consisting of the sim config's filename and the timestamp
      * when the simulation was started in <strong>ISO-8601 format</strong> and <strong>UTC time zone</strong>.
      * @return A string representation of <code>[filename (without extension)]@[ISO-8601-timestamp]</code>.
      */

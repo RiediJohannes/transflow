@@ -1,5 +1,9 @@
 package at.fhv.transflow.simulation;
 
+import at.fhv.transflow.simulation.cli.ErrorCode;
+import at.fhv.transflow.simulation.cli.SimulationOptions;
+import at.fhv.transflow.simulation.cli.SimulationOptionsParser;
+import at.fhv.transflow.simulation.cli.SystemError;
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.MessagingException;
 import at.fhv.transflow.simulation.messaging.stdout.StandardOutputService;
@@ -17,6 +21,10 @@ public class RunSim {
 
     public static void main(String[] args) {
         try {
+            // parse the command-line options given by the user - use defaults if absent
+            var argParser = new SimulationOptionsParser("transflow-sim");
+            SimulationOptions options = argParser.parse(args);
+
             // load the application configuration from the local properties file
             try (InputStream props = Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties")) {
                 AppConfig.init(props);
@@ -42,9 +50,9 @@ public class RunSim {
             String metricsTopic = AppConfig.getProperty("mqtt.topics.metrics").orElseThrow(() ->
                 new SystemError(ErrorCode.NO_MQTT_METRICS_TOPIC));
 
-            try (SumoSimulation simulation = new SumoSimulation(simConfig);
+            try (SumoSimulation simulation = new SumoSimulation(simConfig, options.getStepIncrement());
 //                 IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
-                 IMessagingService messenger = new StandardOutputService(true)) {
+                 IMessagingService messenger = new StandardOutputService(false)) {
 
                 // load the simulation and run it while continuously sending simulation metrics to the given messaging service
                 SumoController simController = new SumoController(simulation, messenger);

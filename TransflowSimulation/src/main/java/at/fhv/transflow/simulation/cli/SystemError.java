@@ -1,4 +1,4 @@
-package at.fhv.transflow.simulation;
+package at.fhv.transflow.simulation.cli;
 
 public class SystemError extends Throwable {
     private final int code;
