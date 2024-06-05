@@ -4,7 +4,8 @@ public enum CommandOption {
     DELAY("d", "delay"),
     INTERACTIVE("i", "interactive"),
     STEP_INCREMENT("s", "step-increment"),
-    STEP_TIME("t", "step-t");
+    STEP_TIME("t", "step-t"),
+    HELP("h", "help");
 
 
     public final String shortName;

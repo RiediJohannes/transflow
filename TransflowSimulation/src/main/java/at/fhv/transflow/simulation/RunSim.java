@@ -13,7 +13,6 @@ import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
@@ -22,7 +21,7 @@ public class RunSim {
     public static void main(String[] args) {
         try {
             // parse the command-line options given by the user - use defaults if absent
-            var argParser = new SimulationOptionsParser("transflow-sim");
+            var argParser = new SimulationOptionsParser("transflow-sim [sumo-config-path]");
             SimulationOptions options = argParser.parse(args);
 
             // load the application configuration from the local properties file
@@ -32,9 +31,11 @@ public class RunSim {
                 throw new SystemError(ErrorCode.INVALID_APP_CONFIG);
             }
 
-            // load the sumo config file and start a new sumo simulation from it
-            Path simConfig = Paths.get(AppConfig.getProperty("sim.path").orElseThrow(() ->
-                new SystemError(ErrorCode.NO_SIM_PATH)));
+            if (options.getSimConfigPath() == null) {
+                // look for the simulation config file path in the application's properties
+                options.setSimConfigPath(Paths.get(AppConfig.getProperty("sim.path").orElseThrow(() ->
+                    new SystemError(ErrorCode.NO_SIM_PATH))));
+            }
 
             // load MQTT configuration to open the connection to a specified MQTT broker
             String mqttBroker = AppConfig.getProperty("mqtt.brokerUrl").orElseThrow(() ->
@@ -50,7 +51,7 @@ public class RunSim {
             String metricsTopic = AppConfig.getProperty("mqtt.topics.metrics").orElseThrow(() ->
                 new SystemError(ErrorCode.NO_MQTT_METRICS_TOPIC));
 
-            try (SumoSimulation simulation = new SumoSimulation(simConfig, options.getStepIncrement());
+            try (SumoSimulation simulation = new SumoSimulation(options.getSimConfigPath(), options.getStepIncrement());
 //                 IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
                  IMessagingService messenger = new StandardOutputService(false)) {
 

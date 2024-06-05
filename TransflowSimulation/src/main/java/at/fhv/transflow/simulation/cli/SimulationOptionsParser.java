@@ -2,8 +2,11 @@ package at.fhv.transflow.simulation.cli;
 
 import org.apache.commons.cli.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Path;
 
 import static at.fhv.transflow.simulation.cli.CommandOption.*;
 
@@ -44,6 +47,9 @@ public class SimulationOptionsParser extends DefaultParser {
             .hasArg().argName("millis").type(Integer.class)
             .build()
         );
+
+        options.addOption(HELP.shortName, HELP.fullName, false,
+            "Show this helpful usage summary for the command.");
     }
 
 
@@ -52,6 +58,11 @@ public class SimulationOptionsParser extends DefaultParser {
 
         try {
             CommandLine cmd = parse(this.options, arguments, false);
+
+            if (cmd.hasOption(HELP.shortName)) {
+                System.out.println(getHelp());
+                System.exit(0);
+            }
 
             if (cmd.hasOption(DELAY.shortName)) {
                 simOptions.setDelayMillis(cmd.getParsedOptionValue(DELAY.shortName));
@@ -71,18 +82,27 @@ public class SimulationOptionsParser extends DefaultParser {
                 simOptions.setStepMillis(cmd.getParsedOptionValue(STEP_TIME.shortName));
             }
 
+            var unrecognizedArgs = cmd.getArgList();
+            if (unrecognizedArgs.size() == 1 && unrecognizedArgs.get(0).endsWith(".sumocfg")) {
+                var file = new File(unrecognizedArgs.get(0));
+                if (file.exists() && file.isFile()) {
+                    simOptions.setSimConfigPath(Path.of(file.getCanonicalPath()));
+                }
+            }
         } catch (ParseException exp) {
-            String help = showHelp();
+            String help = getHelp();
             throw new SystemError(ErrorCode.INVALID_CLI_ARGUMENTS, exp.getMessage() + "\n\n" + help);
         } catch (NumberFormatException exp) {
             throw new SystemError(ErrorCode.INVALID_CLI_ARGUMENTS,
                 "Expected an integer argument - " + exp.getMessage());
+        } catch (IOException e) {
+            throw new SystemError(ErrorCode.INVALID_APP_CONFIG);
         }
 
         return simOptions;
     }
 
-    public String showHelp() {
+    public String getHelp() {
         StringWriter help = new StringWriter();
         PrintWriter writer = new PrintWriter(help);
 
