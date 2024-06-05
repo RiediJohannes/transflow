@@ -51,7 +51,10 @@ public class RunSim {
             String metricsTopic = AppConfig.getProperty("mqtt.topics.metrics").orElseThrow(() ->
                 new SystemError(ErrorCode.NO_MQTT_METRICS_TOPIC));
 
-            try (SumoSimulation simulation = new SumoSimulation(options.getSimConfigPath(), options.getStepIncrement());
+
+            try (SumoSimulation simulation = new SumoSimulation(
+                options.getSimConfigPath(), options.getStepIncrement(), options.getStepMillis());
+
 //                 IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
                  IMessagingService messenger = new StandardOutputService(false)) {
 

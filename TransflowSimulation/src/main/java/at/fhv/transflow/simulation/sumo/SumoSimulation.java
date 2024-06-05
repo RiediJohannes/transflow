@@ -19,7 +19,7 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
      * Instantiates the controller for a new SUMO simulation as defined by the given sumocfg file.
      * @param simulationConfig Relative path to the simulation configuration file with the file extension <em>.sumocfg</em>.
      */
-    public SumoSimulation(Path simulationConfig, int stepIncrement) {
+    public SumoSimulation(Path simulationConfig, int stepIncrement, int stepTimeMillis) {
         // load additional libraries if needed
 //        System.loadLibrary("iconv-2");
 //        System.loadLibrary("intl-8");
@@ -32,7 +32,7 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
 
         // start the simulation
         Simulation.start(new StringVector(new String[]{"sumo", "-c", simulationConfig.toString(), "-v"}));
-        stepIterator = new SumoStepIterator(stepIncrement);
+        stepIterator = new SumoStepIterator(stepTimeMillis, stepIncrement);
     }
 
 
@@ -50,7 +50,7 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
      * @return The new current {@link SumoStep} after performing the requested number of steps.
      */
     public SumoStep executeSteps(int numberOfSteps) {
-        return skipToStep(stepIterator.getStep() + numberOfSteps);
+        return skipToStep(stepIterator.getStepMillis() + numberOfSteps);
     }
 
     /**
@@ -80,29 +80,34 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
      * Inner class to handle iteration over every simulation step ({@link SumoStep}) in the loaded SUMO traffic simulation.
      */
     private static class SumoStepIterator implements Iterator<SumoStep> {
-        private final int increment;
-        private int currentStep;
+        private final int stepIncrement;
+        private final int stepMillis;
+        private int currentMillis;
 
-        public SumoStepIterator(int increment) {
-            if (increment < 1) {
-                throw new IllegalArgumentException("Step increment must be a positive integer! Given: " + increment);
+        public SumoStepIterator(int stepMillis, int stepIncrement) {
+            if (stepIncrement < 1) {
+                throw new IllegalArgumentException("Step increment must be a positive integer! Given: " + stepIncrement);
             }
 
-            this.increment = increment;
-            this.currentStep = -increment;
+            this.stepIncrement = stepIncrement;
+            this.stepMillis = stepMillis;
+            this.currentMillis = -1;
         }
 
         @Override
         public SumoStep next() {
-            currentStep += increment;
-
             // do not trigger a simulation step for the first next() call to retrieve data before the start of the simulation
-            if (currentStep == 0) {
-                return new SumoStep(currentStep);
+            if (currentMillis == -1) {
+                currentMillis = 0;
+                return new SumoStep(currentMillis);
             }
 
-            Simulation.step(currentStep); // let SUMO perform the step
-            return new SumoStep(currentStep);
+            for (int s = 0; s < stepIncrement; s++) {
+                currentMillis += stepMillis;
+                Simulation.step(currentMillis / 1000.0); // let SUMO perform the step
+            }
+
+            return new SumoStep(getStepMillis());
         }
 
         @Override
@@ -111,23 +116,23 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
         }
 
 
-        public int getStep() {
-            return currentStep;
+        public int getStepMillis() {
+            return currentMillis;
         }
 
         public SumoStep setStep(int step) {
-            if (step % increment != 0) {
+            if (step % stepIncrement != 0) {
                 throw new IllegalArgumentException("Manually requested step must be " +
-                    "a multiple of the defined step increment [" + increment + "]!");
+                    "a multiple of the defined step increment [" + stepIncrement + "]!");
             }
 
             // sumo only allows to step forwards, not backwards
-            if (step > currentStep) {
-                currentStep = step;
+            if (step > currentMillis) {
+                currentMillis = step;
                 Simulation.step(step);
             }
 
-            return new SumoStep(currentStep);
+            return new SumoStep(currentMillis);
         }
     }
 }
