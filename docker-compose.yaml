@@ -20,7 +20,7 @@ services:
         aliases:
           - transflow.fhv.at
     env_file:
-      - docker/runtime.env
+      - ./runtime.env
     healthcheck:
       test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"] # check if EMQX is fully initialized
       interval: 30s  # time between the completion of the last check and the next health check
@@ -40,7 +40,7 @@ services:
     networks:
       - transflow
     env_file:
-      - docker/runtime.env
+      - ./runtime.env
 
   telegraf:
     image: telegraf:latest
@@ -62,7 +62,7 @@ services:
         condition: service_healthy
         restart: true
     env_file:
-      - docker/runtime.env
+      - ./runtime.env
 
 
 volumes:
