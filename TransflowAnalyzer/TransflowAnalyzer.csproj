@@ -12,6 +12,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Analysis\**" />
+    <Compile Remove="Sources\Persistence\**" />
+    <Content Remove="Analysis\**" />
+    <Content Remove="Sources\Persistence\**" />
+    <EmbeddedResource Remove="Analysis\**" />
+    <EmbeddedResource Remove="Sources\Persistence\**" />
+    <None Remove="Analysis\**" />
+    <None Remove="Sources\Persistence\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Protobuf Include="Api\Protobuffs\example.proto" GrpcServices="Server" />
   </ItemGroup>
 
@@ -20,11 +31,6 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.63.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
     <PackageReference Include="MQTTnet" Version="4.3.6.1152" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Analysis\" />
-    <Folder Include="Sources\Persistence\" />
   </ItemGroup>
 
 </Project>

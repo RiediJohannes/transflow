@@ -6,6 +6,7 @@ import at.fhv.transflow.simulation.cli.SimulationOptionsParser;
 import at.fhv.transflow.simulation.cli.SystemError;
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.MessagingException;
+import at.fhv.transflow.simulation.messaging.mqtt.MqttService;
 import at.fhv.transflow.simulation.messaging.stdout.StandardOutputService;
 import at.fhv.transflow.simulation.sumo.SumoConfigurationException;
 import at.fhv.transflow.simulation.sumo.SumoController;
@@ -56,8 +57,8 @@ public class RunSim {
             try (SumoSimulation simulation = new SumoSimulation(
                 options.getSimConfigPath(), options.getStepIncrement(), options.getStepMillis());
 
-//                 IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
-                 IMessagingService messenger = new StandardOutputService(false)) {
+                 IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
+//                 IMessagingService messenger = new StandardOutputService(false)) {
 
                 // load the simulation and run it while continuously sending simulation metrics to the given messaging service
                 SumoController simController = new SumoController(simulation, messenger);

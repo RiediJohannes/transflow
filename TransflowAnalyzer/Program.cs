@@ -11,19 +11,19 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
 
-    string? metricsTopic = Environment.GetEnvironmentVariable("MQTT_METRICS_TOPIC");
     string? mqttClientId = Environment.GetEnvironmentVariable("MQTT_ANALYZER_ID");
     string? mqttMetricsTopic = Environment.GetEnvironmentVariable("MQTT_METRICS_TOPIC");
 
-    if (metricsTopic is null || mqttClientId is null || mqttMetricsTopic is null)
+    if (mqttClientId is null || mqttMetricsTopic is null)
         throw new Exception("Failed to find required environment variables!");
 
-    var mqttClient = await MqttServiceFactory.CreateAsync("localhost", mqttClientId, [mqttMetricsTopic]);
+    var mqttParameters = new MqttParameters(mqttClientId, "localhost", [mqttMetricsTopic]);
 
 
     // Add services to the container.
+    builder.Services.AddSingleton(mqttParameters);
+    builder.Services.AddHostedService<MqttConsumerService>();
     builder.Services.AddGrpc();
-    builder.Services.AddSingleton(mqttClient);
 
     var webApi = builder.Build();
 
