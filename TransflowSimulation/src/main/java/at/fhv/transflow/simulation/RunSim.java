@@ -61,7 +61,7 @@ public class RunSim {
 
                 // load the simulation and run it while continuously sending simulation metrics to the given messaging service
                 SumoController simController = new SumoController(simulation, messenger);
-                simController.runSimulation(rootTopic, metricsTopic);
+                simController.runSimulation(rootTopic, metricsTopic, options.getDelayMillis());
 
             } catch (MessagingException exp) {
                 throw new SystemError(ErrorCode.MESSAGING_SERVICE_UNREACHABLE,

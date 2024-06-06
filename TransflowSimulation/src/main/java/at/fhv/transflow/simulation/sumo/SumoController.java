@@ -12,7 +12,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.sumo.libsumo.*;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
@@ -31,7 +33,7 @@ public class SumoController {
 
     /**
      * A timestamp of the local system time when the current simulation run was started (assuming that is has already been started).
-     * @return An {@link Optional<Instant>} of the time {@link #runSimulation(String, String)} was called or an empty Optional
+     * @return An {@link Optional<Instant>} of the time {@link #runSimulation(String, String, int)} was called or an empty Optional
      * if the simulation has not been started yet.
      */
     public Optional<Instant> getStartTime() {
@@ -50,7 +52,26 @@ public class SumoController {
             .orElse("ready");
     }
 
-    public void runSimulation(String rootTopic, String subTopic) throws SystemError {
+    /**
+     * Executes the {@link SumoSimulation} (i.e. running its configured simulation scenario) and publishes
+     * the simulation's current state through the specified {@link IMessagingService} (both given during instantiation).
+     * Data is published regularly in intervals specified in the {@link SumoSimulation} instance to the given message topic,
+     * consisting of {@code rootTopic/simRunId/subTopic/domainTopic/stepId}, where:
+     * <ul>
+     *   <li>{@code rootTopic} and {@code subTopic} are method parameters</li>
+     *   <li>{@code simRunId} is gathered by {@link SumoController#getId() SumoController.getId()}</li>
+     *   <li>{@code domainTopic} specifies the category of data (vehicle data, lane data, ...)</li>
+     *   <li>{@code stepId} is gathered by {@link SumoStep#getId()}</li>
+     * </ul>
+     * @param rootTopic   The highest topic level which all data of the simulation is sent to.
+     * @param subTopic    A sublevel of the topic hierarchy allowing to further specify where metrics of the
+     *                    simulation run are sent to.
+     * @param delayMillis The minimum duration of the evaluation of one simulation step in milliseconds. If the
+     *                    system is faster than this, an artificial delay is added in order to not overwhelm the
+     *                    messaging service or its clients.
+     * @throws SystemError Thrown if the simulation run is aborted.
+     */
+    public void runSimulation(String rootTopic, String subTopic, int delayMillis) throws SystemError {
         startTime = Instant.now();
         String metricsTopic = rootTopic + "/" + getId() + "/" + subTopic;
 
@@ -65,9 +86,11 @@ public class SumoController {
             for (SumoStep step : simulation) {
                 // debug info
                 System.out.println("\n\nStep: " + step.getId());
-                executor.reset();
 
-                // subscribe to all properties of interest for every freshly loaded vehicle
+                executor.reset();
+                long stepStartTime = System.currentTimeMillis();
+
+                // subscribe to all properties of interest for every vehicle newly loaded (updates every time step)
                 for (String newVehicleId : Simulation.getLoadedIDList()) {
                     Vehicle.subscribe(newVehicleId, new IntVector(VehicleMapper.Fields.sumoProperties()));
                     Vehicle.subscribeLeader(newVehicleId, 200.0); // leader can only be subscribed via this method
@@ -106,6 +129,12 @@ public class SumoController {
 
                 // wait until every thread spawned in this time step has finished its execution
                 executor.awaitCompletion();
+
+                // guarantee the step execution time to be at minimum as long as specified by delayMillis
+                long stepDuration = System.currentTimeMillis() - stepStartTime;
+                if (stepDuration < delayMillis) {
+                    Thread.sleep(delayMillis - stepDuration);
+                }
             }
         } catch (InterruptedException exp) {
             throw new SystemError(ErrorCode.EXECUTION_INTERRUPTED);
