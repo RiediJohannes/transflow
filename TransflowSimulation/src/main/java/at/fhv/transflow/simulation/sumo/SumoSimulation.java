@@ -6,6 +6,7 @@ import org.eclipse.sumo.libsumo.StringVector;
 import java.nio.file.Path;
 import java.util.Iterator;
 
+
 /**
  * <p>Control environment for a traffic simulation powered by <a href="https://sumo.dlr.de/docs/index.html">SUMO</a>.
  * Starts and closes a SUMO simulation configured in a <em>*.sumocfg</em> file.</p><br>
@@ -19,7 +20,7 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
      * Instantiates the controller for a new SUMO simulation as defined by the given sumocfg file.
      * @param simulationConfig Relative path to the simulation configuration file with the file extension <em>.sumocfg</em>.
      */
-    public SumoSimulation(Path simulationConfig, int stepIncrement, int stepTimeMillis) {
+    public SumoSimulation(Path simulationConfig, int stepIncrement, int stepTimeMillis) throws SumoConfigurationException {
         // load additional libraries if needed
 //        System.loadLibrary("iconv-2");
 //        System.loadLibrary("intl-8");
@@ -50,7 +51,7 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
      * @return The new current {@link SumoStep} after performing the requested number of steps.
      */
     public SumoStep executeSteps(int numberOfSteps) {
-        return skipToStep(stepIterator.getStepMillis() + numberOfSteps);
+        return stepIterator.executeSteps(numberOfSteps);
     }
 
     /**
@@ -62,7 +63,7 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
      * @return The new current {@link SumoStep} after reaching the target step, i.e., the target step itself.
      */
     public SumoStep skipToStep(int targetStep) {
-        return stepIterator.setStep(targetStep);
+        return stepIterator.setCurrentMillis(targetStep);
     }
 
     @Override
@@ -84,9 +85,13 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
         private final int stepMillis;
         private int currentMillis;
 
-        public SumoStepIterator(int stepMillis, int stepIncrement) {
+        public SumoStepIterator(int stepMillis, int stepIncrement) throws SumoConfigurationException {
             if (stepIncrement < 1) {
-                throw new IllegalArgumentException("Step increment must be a positive integer! Given: " + stepIncrement);
+                throw new SumoConfigurationException("Step increment must be a positive integer! Given: " + stepIncrement);
+            }
+            if (stepMillis < 1 || stepMillis > 1000) {
+                throw new SumoConfigurationException("Step length must be in the range of [1, 1000] milliseconds! " +
+                    "Given: " + stepMillis);
             }
 
             this.stepIncrement = stepIncrement;
@@ -102,12 +107,7 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
                 return new SumoStep(currentMillis);
             }
 
-            for (int s = 0; s < stepIncrement; s++) {
-                currentMillis += stepMillis;
-                Simulation.step(currentMillis / 1000.0); // let SUMO perform the step
-            }
-
-            return new SumoStep(getStepMillis());
+            return executeSteps(stepIncrement);
         }
 
         @Override
@@ -116,23 +116,32 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
         }
 
 
-        public int getStepMillis() {
+        public int getCurrentMillis() {
             return currentMillis;
         }
 
-        public SumoStep setStep(int step) {
-            if (step % stepIncrement != 0) {
+        public SumoStep setCurrentMillis(int millis) {
+            if (millis % stepMillis != 0) {
                 throw new IllegalArgumentException("Manually requested step must be " +
                     "a multiple of the defined step increment [" + stepIncrement + "]!");
             }
 
             // sumo only allows to step forwards, not backwards
-            if (step > currentMillis) {
-                currentMillis = step;
-                Simulation.step(step);
+            if (millis > currentMillis) {
+                currentMillis = millis;
+                Simulation.step(millis / 1000.0);
             }
 
-            return new SumoStep(currentMillis);
+            return new SumoStep(getCurrentMillis());
+        }
+
+        public SumoStep executeSteps(int numberOfSteps) {
+            for (int s = 0; s < numberOfSteps; s++) {
+                currentMillis += stepMillis;
+                Simulation.step(currentMillis / 1000.0); // let SUMO perform the step
+            }
+
+            return new SumoStep(getCurrentMillis());
         }
     }
 }

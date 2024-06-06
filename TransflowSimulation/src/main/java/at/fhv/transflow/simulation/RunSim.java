@@ -7,6 +7,7 @@ import at.fhv.transflow.simulation.cli.SystemError;
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.MessagingException;
 import at.fhv.transflow.simulation.messaging.stdout.StandardOutputService;
+import at.fhv.transflow.simulation.sumo.SumoConfigurationException;
 import at.fhv.transflow.simulation.sumo.SumoController;
 import at.fhv.transflow.simulation.sumo.SumoSimulation;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
@@ -65,6 +66,8 @@ public class RunSim {
             } catch (MessagingException exp) {
                 throw new SystemError(ErrorCode.MESSAGING_SERVICE_UNREACHABLE,
                     "Failed to establish a connection to the specified MQTT broker! Connection URL: '" + mqttBroker + "'");
+            } catch (SumoConfigurationException exp) {
+                throw new SystemError(ErrorCode.INVALID_CLI_ARGUMENTS, exp.getMessage());
             }
 
         } catch (SystemError err) {
@@ -72,7 +75,7 @@ public class RunSim {
             System.err.println(err.getMessage());
             System.exit(err.getSystemCode());
         } catch (Exception exp) {
-            throw new RuntimeException("Unhandled exception!", exp);
+            throw new RuntimeException("Unhandled exception! " + exp.getMessage(), exp);
         }
     }
 }
