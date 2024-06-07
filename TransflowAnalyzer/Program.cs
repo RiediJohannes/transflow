@@ -13,12 +13,15 @@ try
 
 
     string? mqttClientId = Environment.GetEnvironmentVariable("MQTT_ANALYZER_ID");
-    string? mqttMetricsTopic = Environment.GetEnvironmentVariable("MQTT_METRICS_TOPIC");
+    string? mqttRootTopic = Environment.GetEnvironmentVariable("MQTT_TOPIC_ROOT");
+    string? mqttMetricsTopic = Environment.GetEnvironmentVariable("MQTT_TOPIC_METRICS");
+    string[] mqttSubscriptions = Environment.GetEnvironmentVariable("MQTT_SUBSCRIPTIONS")?.Split(",") ?? [];
 
-    if (mqttClientId is null || mqttMetricsTopic is null)
+    if (mqttClientId is null || mqttRootTopic is null || mqttMetricsTopic is null)
         throw new Exception("Failed to find required environment variables!");
 
-    var mqttParameters = new MqttParameters(mqttClientId, "localhost", [mqttMetricsTopic]);
+    var mqttParameters = new MqttParameters(mqttClientId, "localhost",
+        mqttRootTopic, mqttMetricsTopic, mqttSubscriptions);
 
 
     // Add services to the container.

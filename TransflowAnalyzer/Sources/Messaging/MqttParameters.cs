@@ -4,7 +4,9 @@
     (
         string ClientId,
         string BrokerUrl,
-        string[] Topics
+        string RootTopic,
+        string MetricsTopic,
+        string[] Subscriptions
     )
     { }
 }

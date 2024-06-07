@@ -4,19 +4,19 @@ namespace TransflowAnalyzer.Analysis
 {
     public class SimulationDatabase
     {
-        private readonly Dictionary<Type, object> _databases = [];
+        private readonly Dictionary<Type, object> _datasets = [];
 
         public void Add<T>(T data)
             where T : TimeSeriesData, new()
         {
-            var dataset = _databases.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
+            var dataset = _datasets.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
             dataset?.Add(data);
         }
 
         public T? Get<T>(string id, long timeStep)
             where T : TimeSeriesData, new()
         {
-            var dataset = _databases.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
+            var dataset = _datasets.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
             if (dataset is not null)
             {
                 return dataset.GetAtPoint(id, timeStep);
@@ -28,7 +28,7 @@ namespace TransflowAnalyzer.Analysis
         public SortedSet<T> GetRange<T>(string id, long lowerTimeBound, long upperTimeBound)
             where T : TimeSeriesData, new()
         {
-            var dataset = _databases.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
+            var dataset = _datasets.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
             if (dataset is not null)
             {
                 return dataset.GetInRange(id, lowerTimeBound, upperTimeBound);
