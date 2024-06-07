@@ -3,6 +3,6 @@
     public class JunctionEntity : TimeSeriesData
     {
         public PositionEntity? Position { get; set; }
-        public double[] Shape { get; set; } = [];
+        public List<double[]> Shape { get; set; } = [];
     }
 }

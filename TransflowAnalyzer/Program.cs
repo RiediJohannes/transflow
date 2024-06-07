@@ -1,7 +1,7 @@
-using TransflowAnalyzer.Api.Services;
-using TransflowAnalyzer.Sources.Messaging;
 using DotNetEnv;
 using TransflowAnalyzer.Analysis;
+using TransflowAnalyzer.Api.Services;
+using TransflowAnalyzer.Sources.Messaging;
 
 
 try

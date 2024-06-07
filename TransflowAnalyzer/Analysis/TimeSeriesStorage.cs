@@ -8,8 +8,12 @@ namespace TransflowAnalyzer.Analysis
 
         public void Add(T data)
         {
-            var dataset = this.GetValueOrDefault(data.Id, []);
-            dataset.Add(data);
+            TryAdd(data.Id, []); // add a new list of isn't one already
+
+            if (TryGetValue(data.Id, out SortedSet<T>? dataset))
+            {
+                dataset.Add(data);
+            }
         }
 
         public T? GetAtPoint(string id, long time)

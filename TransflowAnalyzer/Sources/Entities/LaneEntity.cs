@@ -7,7 +7,7 @@
         public string[] DisallowedVehicleTypes { get; set; } = [];
         public double? Length { get; set; }
         public double? Width { get; set; }
-        public double[] Shape { get; set; } = [];
+        public List<double[]> Shape { get; set; } = [];
         public double? MaxSpeed { get; set; }
         public double? SumCo2MgPerSecond { get; set; }
         public double? SumCoMgPerSecond { get; set; }

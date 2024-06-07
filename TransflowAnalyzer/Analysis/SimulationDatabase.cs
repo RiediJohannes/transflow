@@ -9,8 +9,13 @@ namespace TransflowAnalyzer.Analysis
         public void Add<T>(T data)
             where T : TimeSeriesData, new()
         {
-            var dataset = _datasets.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
-            dataset?.Add(data);
+            _datasets.TryAdd(typeof(T), new TimeSeriesStorage<T>()); // add a new list of isn't one already
+
+            if (_datasets.TryGetValue(typeof(T), out object? value))
+            {
+                var dataset = value as TimeSeriesStorage<T>;
+                dataset?.Add(data);
+            }
         }
 
         public T? Get<T>(string id, long timeStep)

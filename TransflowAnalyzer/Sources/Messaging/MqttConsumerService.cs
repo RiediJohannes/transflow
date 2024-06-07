@@ -3,9 +3,11 @@ using MQTTnet.Client;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using TransflowAnalyzer.Analysis;
 using TransflowAnalyzer.Sources.Entities;
+
 
 namespace TransflowAnalyzer.Sources.Messaging
 {
@@ -14,14 +16,15 @@ namespace TransflowAnalyzer.Sources.Messaging
         private readonly MqttParameters _parameters;
         private readonly SimulationDatabase _db;
         private readonly IMqttClient _mqttClient;
-        private readonly MqttClientOptions _options;
+        private readonly MqttClientOptions _mqttOptions;
+        private readonly JsonSerializerOptions _jsonOptions;
 
         public MqttConsumerService(MqttParameters parameters, SimulationDatabase database)
         {
             _parameters = parameters;
             _db = database;
 
-            _options = new MqttClientOptionsBuilder()
+            _mqttOptions = new MqttClientOptionsBuilder()
                     .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                     .WithTcpServer(parameters.BrokerUrl)
                     .WithClientId(parameters.ClientId)
@@ -29,13 +32,21 @@ namespace TransflowAnalyzer.Sources.Messaging
                     .Build();
 
             _mqttClient = new MqttFactory().CreateMqttClient();
+
+            _jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+            {
+                WriteIndented = true,
+                TypeInfoResolver = SimDataJsonContext.Default,
+                DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+                UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
+            };
         }
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
             {
-                var connectionResult = await _mqttClient.ConnectAsync(_options, stoppingToken);
+                var connectionResult = await _mqttClient.ConnectAsync(_mqttOptions, stoppingToken);
 
                 if (connectionResult.ResultCode != MqttClientConnectResultCode.Success)
                 {
@@ -61,50 +72,36 @@ namespace TransflowAnalyzer.Sources.Messaging
             }
         }
 
-        private static Task AcceptSimDataMessage(MqttApplicationMessageReceivedEventArgs args)
-        {
-            //Console.WriteLine($"Payload: {Encoding.UTF8.GetString(args.ApplicationMessage.PayloadSegment)}");
 
+        private Task AcceptSimDataMessage(MqttApplicationMessageReceivedEventArgs args)
+        {
             try
             {
-                SimDataTopic dataTopic = ParseTopic(args.ApplicationMessage.Topic);
+                SimDataTopic topicData = ParseTopic(args.ApplicationMessage.Topic);
 
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-
-                switch (dataTopic.Domain)
+                switch (topicData.Domain)
                 {
                     case Domain.Vehicles:
-                    {
-                        VehicleEntity? vehicle = JsonSerializer.Deserialize<VehicleEntity>(args.ApplicationMessage.PayloadSegment, options);
-                        
+                        ParseAndStore<VehicleEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
                         break;
-                    }
                     case Domain.VehicleTypes:
-                    {
+                        ParseAndStore<VehicleTypeEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
                         break;
-                    }
                     case Domain.Edges:
-                    {
+                        ParseAndStore<EdgeEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
                         break;
-                    }
                     case Domain.Lanes:
-                    {
+                        ParseAndStore<LaneEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
                         break;
-                    }
                     case Domain.Junctions:
-                    {
+                        ParseAndStore<JunctionEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
                         break;
-                    }
                     case Domain.Routes:
-                    {
+                        ParseAndStore<RouteEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
                         break;
-                    }
                     default:
                         throw new TopicParseException(args.ApplicationMessage.Topic,
-                        $"Unrecognized metric domain '{dataTopic.Domain}'");
+                        $"Unrecognized metric domain '{topicData.Domain}'");
                 }
             }
             catch (TopicParseException exp)
@@ -113,6 +110,21 @@ namespace TransflowAnalyzer.Sources.Messaging
             }
 
             return Task.CompletedTask;
+        }
+
+        // these warnings are false positives according to https://stackoverflow.com/a/78579373/18284107
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
+        private void ParseAndStore<T>(ReadOnlySpan<byte> utf8json, long timeStep)
+            where T : TimeSeriesData, new()
+        {
+            T? timeSeriesEntity = JsonSerializer.Deserialize<T>(utf8json, _jsonOptions);
+
+            if (timeSeriesEntity is not null)
+            {
+                timeSeriesEntity.TimeStep = timeStep;
+                _db.Add(timeSeriesEntity);
+            }
         }
 
         private static SimDataTopic ParseTopic(string topic)

@@ -6,7 +6,7 @@
         public double? Length { get; set; }
         public double? Width { get; set; }
         public double? Height { get; set; }
-        public double[] Shape { get; set; } = [];
+        public List<double[]> Shape { get; set; } = [];
         public string? HexColor { get; set; }
         public double? MaxSpeed { get; set; }
         public double? MaxSpeedLateral { get; set; }
