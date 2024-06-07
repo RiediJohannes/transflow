@@ -1,4 +1,4 @@
-﻿namespace TransflowAnalyzer.Sources.Messaging
+﻿namespace TransflowAnalyzer.Sources.Messaging.Json
 {
     public class TopicParseException : Exception
     {

@@ -5,8 +5,10 @@ using MQTTnet.Server;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using TransflowAnalyzer.Analysis;
+using TransflowAnalyzer.Analysis.Memory;
 using TransflowAnalyzer.Sources.Entities;
+using TransflowAnalyzer.Sources.Messaging.Json;
+using TransflowAnalyzer.Sources.Messaging.Mqtt;
 
 
 namespace TransflowAnalyzer.Sources.Messaging
@@ -14,15 +16,15 @@ namespace TransflowAnalyzer.Sources.Messaging
     public partial class MqttConsumerService : BackgroundService
     {
         private readonly MqttParameters _parameters;
-        private readonly SimulationDatabase _db;
+        private readonly SimulationStorage _storage;
         private readonly IMqttClient _mqttClient;
         private readonly MqttClientOptions _mqttOptions;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        public MqttConsumerService(MqttParameters parameters, SimulationDatabase database)
+        public MqttConsumerService(MqttParameters parameters, SimulationStorage storage)
         {
             _parameters = parameters;
-            _db = database;
+            _storage = storage;
 
             _mqttOptions = new MqttClientOptionsBuilder()
                     .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
@@ -82,22 +84,22 @@ namespace TransflowAnalyzer.Sources.Messaging
                 switch (topicData.Domain)
                 {
                     case Domain.Vehicles:
-                        ParseAndStore<VehicleEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
+                        ParseAndStore<VehicleEntity>(args.ApplicationMessage.PayloadSegment, topicData.SimulationId, topicData.Time);
                         break;
                     case Domain.VehicleTypes:
-                        ParseAndStore<VehicleTypeEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
+                        ParseAndStore<VehicleTypeEntity>(args.ApplicationMessage.PayloadSegment, topicData.SimulationId, topicData.Time);
                         break;
                     case Domain.Edges:
-                        ParseAndStore<EdgeEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
+                        ParseAndStore<EdgeEntity>(args.ApplicationMessage.PayloadSegment, topicData.SimulationId, topicData.Time);
                         break;
                     case Domain.Lanes:
-                        ParseAndStore<LaneEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
+                        ParseAndStore<LaneEntity>(args.ApplicationMessage.PayloadSegment, topicData.SimulationId, topicData.Time);
                         break;
                     case Domain.Junctions:
-                        ParseAndStore<JunctionEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
+                        ParseAndStore<JunctionEntity>(args.ApplicationMessage.PayloadSegment, topicData.SimulationId, topicData.Time);
                         break;
                     case Domain.Routes:
-                        ParseAndStore<RouteEntity>(args.ApplicationMessage.PayloadSegment, topicData.Time);
+                        ParseAndStore<RouteEntity>(args.ApplicationMessage.PayloadSegment, topicData.SimulationId, topicData.Time);
                         break;
                     default:
                         throw new TopicParseException(args.ApplicationMessage.Topic,
@@ -115,7 +117,7 @@ namespace TransflowAnalyzer.Sources.Messaging
         // these warnings are false positives according to https://stackoverflow.com/a/78579373/18284107
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
-        private void ParseAndStore<T>(ReadOnlySpan<byte> utf8json, long timeStep)
+        private void ParseAndStore<T>(ReadOnlySpan<byte> utf8json, string simulationId, long timeStep)
             where T : TimeSeriesData, new()
         {
             T? timeSeriesEntity = JsonSerializer.Deserialize<T>(utf8json, _jsonOptions);
@@ -123,7 +125,7 @@ namespace TransflowAnalyzer.Sources.Messaging
             if (timeSeriesEntity is not null)
             {
                 timeSeriesEntity.TimeStep = timeStep;
-                _db.Add(timeSeriesEntity);
+                _storage.Database(simulationId).Add(timeSeriesEntity);
             }
         }
 

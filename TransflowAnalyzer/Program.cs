@@ -1,7 +1,8 @@
 using DotNetEnv;
-using TransflowAnalyzer.Analysis;
+using TransflowAnalyzer.Analysis.Memory;
 using TransflowAnalyzer.Api.Services;
 using TransflowAnalyzer.Sources.Messaging;
+using TransflowAnalyzer.Sources.Messaging.Mqtt;
 
 
 try
@@ -25,7 +26,7 @@ try
 
 
     // Add services to the container.
-    builder.Services.AddSingleton<SimulationDatabase>();
+    builder.Services.AddSingleton<SimulationStorage>();
     builder.Services.AddSingleton(mqttParameters);
     builder.Services.AddHostedService<MqttConsumerService>();
     builder.Services.AddGrpc();

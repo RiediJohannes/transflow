@@ -1,19 +1,19 @@
 ﻿using TransflowAnalyzer.Sources.Entities;
 
-namespace TransflowAnalyzer.Analysis
+namespace TransflowAnalyzer.Analysis.Memory
 {
-    public class SimulationDatabase
+    public class TimeSeriesDatabase
     {
         private readonly Dictionary<Type, object> _datasets = [];
 
         public void Add<T>(T data)
             where T : TimeSeriesData, new()
         {
-            _datasets.TryAdd(typeof(T), new TimeSeriesStorage<T>()); // add a new list of isn't one already
+            _datasets.TryAdd(typeof(T), new TimeSeriesDataset<T>()); // add a new list of isn't one already
 
             if (_datasets.TryGetValue(typeof(T), out object? value))
             {
-                var dataset = value as TimeSeriesStorage<T>;
+                var dataset = value as TimeSeriesDataset<T>;
                 dataset?.Add(data);
             }
         }
@@ -21,7 +21,7 @@ namespace TransflowAnalyzer.Analysis
         public T? Get<T>(string id, long timeStep)
             where T : TimeSeriesData, new()
         {
-            var dataset = _datasets.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
+            var dataset = _datasets.GetValueOrDefault(typeof(T), new TimeSeriesDataset<T>()) as TimeSeriesDataset<T>;
             if (dataset is not null)
             {
                 return dataset.GetAtPoint(id, timeStep);
@@ -33,7 +33,7 @@ namespace TransflowAnalyzer.Analysis
         public SortedSet<T> GetRange<T>(string id, long lowerTimeBound, long upperTimeBound)
             where T : TimeSeriesData, new()
         {
-            var dataset = _datasets.GetValueOrDefault(typeof(T), new TimeSeriesStorage<T>()) as TimeSeriesStorage<T>;
+            var dataset = _datasets.GetValueOrDefault(typeof(T), new TimeSeriesDataset<T>()) as TimeSeriesDataset<T>;
             if (dataset is not null)
             {
                 return dataset.GetInRange(id, lowerTimeBound, upperTimeBound);
