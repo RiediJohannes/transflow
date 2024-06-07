@@ -1,8 +1,7 @@
 ﻿namespace TransflowAnalyzer.Sources.Entities
 {
-    public class VehicleEntity
+    public class VehicleEntity : TimeSeriesData
     {
-        public string Id { get; set; } = string.Empty;
         public string? HexColor { get; set; }
         public string? VehicleTypeId { get; set; }
         public double? Length { get; set; }

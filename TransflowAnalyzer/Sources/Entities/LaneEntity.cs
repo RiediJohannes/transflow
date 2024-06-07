@@ -1,8 +1,7 @@
 ﻿namespace TransflowAnalyzer.Sources.Entities
 {
-    public class LaneEntity
+    public class LaneEntity : TimeSeriesData
     {
-        public string Id { get; set; } = string.Empty;
         public string? EdgeId { get; set; }
         public string[] AllowedVehicleTypes { get; set; } = [];
         public string[] DisallowedVehicleTypes { get; set; } = [];

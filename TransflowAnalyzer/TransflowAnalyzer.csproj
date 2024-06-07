@@ -12,13 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Analysis\**" />
     <Compile Remove="Sources\Persistence\**" />
-    <Content Remove="Analysis\**" />
     <Content Remove="Sources\Persistence\**" />
-    <EmbeddedResource Remove="Analysis\**" />
     <EmbeddedResource Remove="Sources\Persistence\**" />
-    <None Remove="Analysis\**" />
     <None Remove="Sources\Persistence\**" />
   </ItemGroup>
 

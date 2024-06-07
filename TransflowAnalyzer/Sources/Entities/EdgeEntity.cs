@@ -1,8 +1,7 @@
 ﻿namespace TransflowAnalyzer.Sources.Entities
 {
-    public class EdgeEntity
+    public class EdgeEntity : TimeSeriesData
     {
-        public string Id { get; set; } = string.Empty;
         public int? LaneCount { get; set; }
         public string? StreetName { get; set; }
         public double? SumCo2MgPerSecond { get; set; }

@@ -1,8 +1,7 @@
 ﻿namespace TransflowAnalyzer.Sources.Entities
 {
-    public class RouteEntity
+    public class RouteEntity : TimeSeriesData
     {
-        public string? Id { get; set; }
         public string[] Edges { get; set; } = [];
     }
 
