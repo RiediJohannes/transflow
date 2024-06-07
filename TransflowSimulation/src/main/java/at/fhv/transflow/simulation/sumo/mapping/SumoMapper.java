@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
  * and common Java data types.
  */
 public abstract class SumoMapper {
+    private static final double NUMBER_CUTOFF_POINT = -1e9;
 
     public static String hexColorFromTraCI(TraCIColor traciColor) {
         if (traciColor == null) return null;
@@ -25,7 +26,7 @@ public abstract class SumoMapper {
     }
 
     public static String hexColorFromTraCI(String traciColorString) {
-        if (traciColorString == null) return null;
+        if (traciColorString == null || traciColorString.isBlank()) return null;
 
         List<String> matches = Pattern.compile("(?<=[(,\\s])\\d+(?=[,)\\s])")
             .matcher(traciColorString)
@@ -45,7 +46,7 @@ public abstract class SumoMapper {
     }
 
     public static String[] parseTraCIList(String traciList) {
-        if (traciList == null) return null;
+        if (traciList == null || traciList.isBlank()) return null;
 
         // return early if the list is empty to prevent it from being parsed as `new String[] {""}`
         if ("[]".equals(traciList.strip())) return new String[0];
@@ -56,20 +57,20 @@ public abstract class SumoMapper {
     }
 
     public static Position parsePosition(String traciPosition) {
-        if (traciPosition == null) return new Position();
+        if (traciPosition == null || traciPosition.isBlank()) return new Position();
 
         List<Double> coordinateList = Pattern.compile("[-\\d]+")
             .matcher(traciPosition)
             .results()
             .map(MatchResult::group)
-            .map(Double::valueOf)
+            .map(SumoMapper::tryParseDouble)
             .toList();
 
         return new Position(coordinateList);
     }
 
     public static List<Double[]> parseShapeList(String shapeList) {
-        if (shapeList == null) return null;
+        if (shapeList == null || shapeList.isBlank()) return null;
 
         if ("[]".equals(shapeList.strip())) return new ArrayList<>(0);
 
@@ -80,7 +81,7 @@ public abstract class SumoMapper {
         return matcher.results()
             .map(match -> match.group().split(","))
             .map(list -> Arrays.stream(list)
-                .map(Double::parseDouble).toArray(Double[]::new)
+                .map(SumoMapper::tryParseDouble).toArray(Double[]::new)
             ).toList();
     }
 
@@ -92,10 +93,12 @@ public abstract class SumoMapper {
      * @return Either an Integer with the parsed value or null if failed to parse.
      */
     public static Integer tryParseInteger(String numberString) {
-        if (numberString == null) return null;
+        if (numberString == null || numberString.isBlank()) return null;
 
         try {
-            return Integer.valueOf(numberString);
+            // if SUMO cannot determine a value, it returns the int value -1073741824 instead of null
+            var number = Integer.parseInt(numberString);
+            return number > NUMBER_CUTOFF_POINT ? number : null;
         } catch (NumberFormatException exp) {
             return null;
         }
@@ -109,10 +112,12 @@ public abstract class SumoMapper {
      * @return Either a Double with the parsed value or null if failed to parse.
      */
     public static Double tryParseDouble(String numberString) {
-        if (numberString == null) return null;
+        if (numberString == null || numberString.isBlank()) return null;
 
         try {
-            return Double.valueOf(numberString);
+            // if SUMO cannot determine a value, it returns the double value -1.07374E9 instead of null
+            var number = Double.parseDouble(numberString);
+            return number > NUMBER_CUTOFF_POINT ? number : null;
         } catch (NumberFormatException exp) {
             return null;
         }

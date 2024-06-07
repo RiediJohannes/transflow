@@ -1,5 +1,6 @@
 package at.fhv.transflow.simulation.messaging;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,12 +14,15 @@ public class JsonMapper {
     private JsonMapper() {
         mapper = new ObjectMapper();
 
-        // Don't throw an exception when json has extra fields your java object does not have.
+        // don't throw an exception when json has extra fields your java object does not have.
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        // Write times as a ISO String instead of a Long to make them more human-readable.
+        // write times as a ISO String instead of a Long to make them more human-readable.
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         mapper.registerModule(new JavaTimeModule());
+        // order json properties alphabetically by their keys
+        mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+        // also include properties whose value is null
+        mapper.setSerializationInclusion(JsonInclude.Include.USE_DEFAULTS);
     }
 
     public static JsonMapper instance() {
