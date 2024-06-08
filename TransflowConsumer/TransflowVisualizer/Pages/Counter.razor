@@ -1,18 +1,26 @@
 ﻿@page "/counter"
+@inject Greeter.GreeterClient Greeter
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Test</PageTitle>
 
-<h1>Counter</h1>
+<h1>Test</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p role="status">Response via gRPC: @response</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="SendRequest">Click me</button>
 
 @code {
-    private int currentCount = 0;
+    private string response = "";
 
-    private void IncrementCount()
+    private async void SendRequest()
     {
-        currentCount++;
+        HelloReply? result = await Greeter.SayHelloAsync(new HelloRequest() { Name = "Johannes" });
+
+        Console.WriteLine(result);
+        if (result is not null)
+        {
+            response = result.Message;
+            StateHasChanged();
+        }
     }
 }
