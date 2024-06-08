@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransflowAnalyzer", "Transf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransflowConsumer.Shared", "TransflowConsumer.Shared\TransflowConsumer.Shared.csproj", "{D9D3A1F8-6156-47AC-806C-658E52828897}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransflowVisualizer", "TransflowVisualizer\TransflowVisualizer.csproj", "{3C2E1019-C690-45FF-8EA9-5D8A3E0F2E68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{D9D3A1F8-6156-47AC-806C-658E52828897}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9D3A1F8-6156-47AC-806C-658E52828897}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9D3A1F8-6156-47AC-806C-658E52828897}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C2E1019-C690-45FF-8EA9-5D8A3E0F2E68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C2E1019-C690-45FF-8EA9-5D8A3E0F2E68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C2E1019-C690-45FF-8EA9-5D8A3E0F2E68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C2E1019-C690-45FF-8EA9-5D8A3E0F2E68}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
