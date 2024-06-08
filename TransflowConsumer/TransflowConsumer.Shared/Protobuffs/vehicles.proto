@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+option csharp_namespace = "TransflowConsumer.Shared.Protobuffs";
+
+import "Protobuffs/common.proto";
+import "Protobuffs/simulation.proto";
+
+package vehicle;
+
+
+service Vehicles {
+	rpc GetVehicles (simulation.SimulationId) returns (VehicleList);
+  rpc GetVehicleTypes (simulation.SimulationId) returns (VehicleTypeList);
+
+  rpc GetVehicleDataFull (SingleEntity) returns (VehicleDataRange);
+  rpc GetVehicleDataPoint (SingleEntityDataPoint) returns (VehicleData);
+  rpc GetVehicleDataRange (SingleEntityDataRange) returns (VehicleDataRange);
+
+	rpc GetVehicleTypeData (SingleEntity) returns (VehicleTypeData);
+}
+
+
+// ----------------- requests -----------------
+message SingleEntity {
+	simulation.SimulationId simulation_id = 1;
+	string entity_id = 2;
+}
+
+message SingleEntityDataPoint {
+	simulation.SimulationId simulation_id = 1;
+	string entity_id = 2;
+	int64 time_step = 3;
+}
+
+message SingleEntityDataRange {
+	simulation.SimulationId simulation_id = 1;
+	string entity_id = 2;
+	int64 from = 3;
+	int64 to = 4;
+}
+
+
+// ------------------ replies ------------------
+message Vehicle {
+	string id = 1;
+	string vehicle_type_id = 2;
+}
+
+message VehicleType {
+	string id = 1;
+	string vehicle_class = 2;
+}
+
+message VehicleTypeList {
+	repeated VehicleType types = 1;
+}
+
+message VehicleList {
+	repeated Vehicle vehicles = 1;
+}
+
+
+message VehicleData {
+	int64 time_step = 1;
+	double speed = 2;
+	double acceleration = 3;
+	common.Position position = 4;
+	double fuel_consumption = 5;
+}
+
+message VehicleDataRange {
+		repeated VehicleData points = 1;
+}
+
+message VehicleTypeData {
+	double length = 1;
+	double width = 2;
+	double height = 3;
+	double max_speed = 4;
+	double max_acceleration = 5;
+	double max_deceleration = 6;
+	int32 seats = 7;
+}

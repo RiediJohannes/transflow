@@ -2,6 +2,7 @@
 obj/
 bin/
 .vs/
+.idea/
 
 # exclude environment variable files
 *.env

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "TransflowConsumer.Shared.Protobuffs";
+
+import "google/protobuf/empty.proto";
+
+package simulation;
+
+
+service Simulations {
+  rpc GetSimulations (google.protobuf.Empty) returns (SimulationResponse);
+}
+
+message SimulationResponse {
+	repeated SimulationId simulations_ids = 1;
+} 
+
+message SimulationId {
+	string simulations_id = 1;
+}
