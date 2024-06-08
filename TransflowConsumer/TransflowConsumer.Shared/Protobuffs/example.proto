@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "TransflowAnalyzer";
+option csharp_namespace = "TransflowConsumer.Shared.Protobuffs";
 
 package greet;
 

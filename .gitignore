@@ -3,6 +3,9 @@
 /docker/data/*
 /docker/backup
 
+obj/
+bin/
+
 # exclude environment variable files
 *.env
 

@@ -1,4 +1,5 @@
 using Grpc.Core;
+using TransflowConsumer.Shared.Protobuffs;
 
 namespace TransflowAnalyzer.Api.Services
 {

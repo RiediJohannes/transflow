@@ -1,4 +1,5 @@
-﻿using TransflowAnalyzer.Sources.Entities;
+﻿using System.Diagnostics;
+using TransflowAnalyzer.Sources.Entities;
 
 namespace TransflowAnalyzer.Analysis.Memory
 {
@@ -13,6 +14,8 @@ namespace TransflowAnalyzer.Analysis.Memory
             if (TryGetValue(data.Id, out SortedSet<T>? timeSeries))
             {
                 timeSeries.Add(data);
+                Debug.WriteLine($"Stored {typeof(T).Name} with ID {data.Id} for time step {data.TimeStep} in memory. " +
+                    $"(time series size: {timeSeries.Count})");
             }
         }
 

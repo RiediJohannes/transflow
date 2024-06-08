@@ -12,21 +12,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Sources\Persistence\**" />
-    <Content Remove="Sources\Persistence\**" />
-    <EmbeddedResource Remove="Sources\Persistence\**" />
-    <None Remove="Sources\Persistence\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="Api\Protobuffs\example.proto" GrpcServices="Server" />
+    <Compile Remove="TransflowAnalyzer.Shared\**" />
+    <Content Remove="TransflowAnalyzer.Shared\**" />
+    <EmbeddedResource Remove="TransflowAnalyzer.Shared\**" />
+    <None Remove="TransflowAnalyzer.Shared\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.0.0" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.63.0" />
+    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.63.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
     <PackageReference Include="MQTTnet" Version="4.3.6.1152" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TransflowConsumer.Shared\TransflowConsumer.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,7 @@
+# general excludes
+obj/
+bin/
+.vs/
+
+# exclude environment variable files
+*.env

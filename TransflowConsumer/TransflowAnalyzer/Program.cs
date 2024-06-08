@@ -1,4 +1,5 @@
 using DotNetEnv;
+using System.IO.Compression;
 using TransflowAnalyzer.Analysis.Memory;
 using TransflowAnalyzer.Api.Services;
 using TransflowAnalyzer.Sources.Messaging;
@@ -8,7 +9,7 @@ using TransflowAnalyzer.Sources.Messaging.Mqtt;
 try
 {
     // load environment variables from the .env file immediately outside this subproject's root
-    Env.Load("../runtime.env");
+    Env.Load("../../runtime.env");
 
     var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +30,9 @@ try
     builder.Services.AddSingleton<SimulationStorage>();
     builder.Services.AddSingleton(mqttParameters);
     builder.Services.AddHostedService<MqttConsumerService>();
-    builder.Services.AddGrpc();
+    builder.Services.AddGrpc(
+        config => { config.ResponseCompressionLevel = CompressionLevel.Fastest; }
+    );
 
     var webApi = builder.Build();
 
