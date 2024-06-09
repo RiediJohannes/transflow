@@ -31,7 +31,7 @@
         public double? PositionOnLane { get; set; }
         public int? LaneChangeState { get; set; }
         public int? SignalState { get; set; }
-        public int StopState { get; set; }
+        public int? StopState { get; set; }
         public string[] PersonIds { get; set; } = [];
         public double? CO2mgPerSecond { get; set; }
         public double? HCmgPerSecond { get; set; }
