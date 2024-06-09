@@ -1,11 +1,14 @@
 using DotNetEnv;
-using Google.Protobuf.WellKnownTypes;
-using Microsoft.AspNetCore.Cors.Infrastructure;
+using GrpcBrowser.Configuration;
 using System.IO.Compression;
 using TransflowAnalyzer.Analysis.Memory;
+using TransflowAnalyzer.Api.Endpoints;
+using TransflowAnalyzer.Api.Mapping;
 using TransflowAnalyzer.Api.Services;
+using TransflowAnalyzer.Sources.Entities;
 using TransflowAnalyzer.Sources.Messaging;
 using TransflowAnalyzer.Sources.Messaging.Mqtt;
+using TransflowConsumer.Shared.Protobuffs;
 
 
 try
@@ -29,13 +32,22 @@ try
 
 
     // Add services to the container.
+    builder.Services.AddTransient<IConverter<PositionEntity?, PositionData>, PositionMapper>();
+    builder.Services.AddTransient<IConverter<VehicleEntity, VehicleData>, VehicleMapper>();
+    builder.Services.AddTransient<IConverter<VehicleTypeEntity, VehicleTypeData>, VehicleTypeMapper>();
+
     builder.Services.AddSingleton<SimulationStorage>();
+    builder.Services.AddSingleton<ISimulationDataSink>(x => x.GetRequiredService<SimulationStorage>());
+    builder.Services.AddSingleton<ISimulationRepository>(x => x.GetRequiredService<SimulationStorage>());
+    builder.Services.AddSingleton<IVehicleRepository>(x => x.GetRequiredService<SimulationStorage>());
+
     builder.Services.AddSingleton(mqttParameters);
     builder.Services.AddHostedService<MqttConsumerService>();
 
     builder.Services.AddGrpc(
         config => { config.ResponseCompressionLevel = CompressionLevel.Fastest; }
     );
+    builder.Services.AddGrpcBrowser();
 
     builder.Services.AddCors(options =>
     {
@@ -60,18 +72,27 @@ try
 
     var webApi = builder.Build();
 
-    if (webApi.Environment.IsDevelopment())
-    {
-        webApi.UseWebAssemblyDebugging();
-    }
+#if DEBUG
+    webApi.UseWebAssemblyDebugging();
+#endif
 
     webApi.UseRouting();
     webApi.UseCors();
 
+    webApi.UseGrpcWeb();
+    webApi.UseGrpcBrowser();
+
     // Configure the HTTP request pipeline.
     webApi.MapGet("/", () => "This service only supports communication through a gRPC client. HTTP/1.1 GET request is not supported.");
-    webApi.UseGrpcWeb();
-    webApi.MapGrpcService<ExampleService>().EnableGrpcWeb().RequireCors("AllowAllGrpc");
+
+    webApi.MapGrpcService<ExampleService>().EnableGrpcWeb()
+        .RequireCors("AllowAllGrpc").AddToGrpcBrowserWithClient<Greeter.GreeterClient>();
+    webApi.MapGrpcService<SimulationService>().EnableGrpcWeb()
+        .RequireCors("AllowAllGrpc").AddToGrpcBrowserWithClient<Simulations.SimulationsClient>();
+    webApi.MapGrpcService<VehicleService>().EnableGrpcWeb()
+        .RequireCors("AllowAllGrpc").AddToGrpcBrowserWithClient<Vehicles.VehiclesClient>();
+
+    webApi.MapGrpcBrowser();
 
     webApi.Run();
 }

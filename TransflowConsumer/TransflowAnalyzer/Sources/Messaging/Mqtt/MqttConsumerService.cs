@@ -5,7 +5,6 @@ using MQTTnet.Server;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using TransflowAnalyzer.Analysis.Memory;
 using TransflowAnalyzer.Sources.Entities;
 using TransflowAnalyzer.Sources.Messaging.Json;
 using TransflowAnalyzer.Sources.Messaging.Mqtt;
@@ -16,12 +15,12 @@ namespace TransflowAnalyzer.Sources.Messaging
     public partial class MqttConsumerService : BackgroundService
     {
         private readonly MqttParameters _parameters;
-        private readonly SimulationStorage _storage;
+        private readonly ISimulationDataSink _storage;
         private readonly IMqttClient _mqttClient;
         private readonly MqttClientOptions _mqttOptions;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        public MqttConsumerService(MqttParameters parameters, SimulationStorage storage)
+        public MqttConsumerService(MqttParameters parameters, ISimulationDataSink storage)
         {
             _parameters = parameters;
             _storage = storage;
@@ -125,7 +124,7 @@ namespace TransflowAnalyzer.Sources.Messaging
             if (timeSeriesEntity is not null)
             {
                 timeSeriesEntity.TimeStep = timeStep;
-                _storage.Database(simulationId).Add(timeSeriesEntity);
+                _storage.GetOrCreateDatabase(simulationId).Add(timeSeriesEntity);
             }
         }
 
