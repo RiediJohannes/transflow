@@ -2,6 +2,7 @@ syntax = "proto3";
 
 option csharp_namespace = "TransflowConsumer.Shared.Protobuffs";
 
+import "google/protobuf/wrappers.proto";
 import "Protobuffs/common.proto";
 import "Protobuffs/simulation.proto";
 
@@ -13,10 +14,10 @@ service Vehicles {
   rpc GetVehicleTypes (simulation.SimulationId) returns (VehicleTypeList);
 
   rpc GetVehicleDataFull (SingleEntity) returns (VehicleDataRange);
-  rpc GetVehicleDataPoint (SingleEntityDataPoint) returns (VehicleData);
+  rpc GetVehicleDataPoint (SingleEntityDataPoint) returns (VehicleDataPoint);
   rpc GetVehicleDataRange (SingleEntityDataRange) returns (VehicleDataRange);
 
-	rpc GetVehicleTypeData (SingleEntity) returns (VehicleTypeData);
+	rpc GetVehicleTypeData (SingleEntity) returns (VehicleTypeDataPoint);
 }
 
 
@@ -41,43 +42,49 @@ message SingleEntityDataRange {
 
 
 // ------------------ replies ------------------
-message Vehicle {
+message VehicleKey {
 	string id = 1;
 	string vehicle_type_id = 2;
 }
 
-message VehicleType {
+message VehicleTypeKey {
 	string id = 1;
-	string vehicle_class = 2;
 }
 
 message VehicleTypeList {
-	repeated VehicleType types = 1;
+	repeated VehicleTypeKey vehicle_types = 1;
 }
 
 message VehicleList {
-	repeated Vehicle vehicles = 1;
+	repeated VehicleKey vehicles = 1;
 }
 
+message VehicleDataPoint {
+	optional VehicleData data = 1;
+}
 
 message VehicleData {
 	int64 time_step = 1;
-	double speed = 2;
-	double acceleration = 3;
-	common.Position position = 4;
-	double fuel_consumption = 5;
+	google.protobuf.DoubleValue speed = 2;
+	google.protobuf.DoubleValue acceleration = 3;
+	common.PositionData position = 4;
+	google.protobuf.DoubleValue fuel_consumption = 5;
 }
 
 message VehicleDataRange {
 		repeated VehicleData points = 1;
 }
 
+message VehicleTypeDataPoint {
+	optional VehicleTypeData data = 1;
+}
+
 message VehicleTypeData {
-	double length = 1;
-	double width = 2;
-	double height = 3;
-	double max_speed = 4;
-	double max_acceleration = 5;
-	double max_deceleration = 6;
-	int32 seats = 7;
+	google.protobuf.DoubleValue length = 1;
+	google.protobuf.DoubleValue width = 2;
+	google.protobuf.DoubleValue height = 3;
+	google.protobuf.DoubleValue max_speed = 4;
+	google.protobuf.DoubleValue max_acceleration = 5;
+	google.protobuf.DoubleValue max_deceleration = 6;
+	google.protobuf.Int32Value seats = 7;
 }

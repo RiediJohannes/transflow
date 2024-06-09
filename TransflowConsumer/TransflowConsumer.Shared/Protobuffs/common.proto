@@ -5,7 +5,7 @@ option csharp_namespace = "TransflowConsumer.Shared.Protobuffs";
 package common;
 
 
-message Position {
+message PositionData {
 	double x = 1;
 	double y = 2;
 	double z = 3;

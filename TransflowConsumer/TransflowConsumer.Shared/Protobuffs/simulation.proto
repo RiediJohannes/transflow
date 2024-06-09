@@ -16,5 +16,5 @@ message SimulationResponse {
 } 
 
 message SimulationId {
-	string simulations_id = 1;
+	string id = 1;
 }
