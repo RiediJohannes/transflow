@@ -3,9 +3,9 @@
 
 <PageTitle>Test</PageTitle>
 
-<h1>Test gRPC connection</h1>
+<h1 class="mt-6">Test gRPC connection</h1>
 
-<button class="btn btn-primary mt-3 mb-3" @onclick="SendRequest">Query simulations</button>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" class="mt-3 mb-3" @onclick="SendRequest">Query simulations</MudButton>
 
 @if (simulationsIds is not null) {
     <p role="status"><strong>Simulations IDs:</strong>
