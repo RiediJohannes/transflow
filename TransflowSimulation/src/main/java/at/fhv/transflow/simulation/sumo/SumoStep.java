@@ -14,15 +14,15 @@ import java.util.stream.Stream;
  * simulation metrics such as {@link #getVehicleData()}.
  */
 public class SumoStep {
-    private final int id;
+    private final int currentMillis;
 
-    public SumoStep(int stepId) {
-        this.id = stepId;
+    public SumoStep(int simulationTimeMillis) {
+        this.currentMillis = simulationTimeMillis;
     }
 
 
-    public int getId() {
-        return id;
+    public int getCurrentMillis() {
+        return currentMillis;
     }
 
     /**

@@ -61,7 +61,7 @@ public class SumoController {
      *   <li>{@code rootTopic} and {@code subTopic} are method parameters</li>
      *   <li>{@code simRunId} is gathered by {@link SumoController#getId() SumoController.getId()}</li>
      *   <li>{@code domainTopic} specifies the category of data (vehicle data, lane data, ...)</li>
-     *   <li>{@code stepId} is gathered by {@link SumoStep#getId()}</li>
+     *   <li>{@code stepId} is gathered by {@link SumoStep#getCurrentMillis()}</li>
      * </ul>
      * @param rootTopic   The highest topic level which all data of the simulation is sent to.
      * @param subTopic    A sublevel of the topic hierarchy allowing to further specify where metrics of the
@@ -82,10 +82,10 @@ public class SumoController {
         Lane.getIDList().forEach(lane -> Lane.subscribe(lane, new IntVector(LaneMapper.Fields.sumoProperties())));
         Junction.getIDList().forEach(junction -> Junction.subscribe(junction, new IntVector(JunctionMapper.Fields.sumoProperties())));
 
+        System.out.println();
         try (AwaitableExecutor executor = new AwaitableExecutor(Executors.newFixedThreadPool(THREAD_POOL_SIZE))) {
             for (SumoStep step : simulation) {
-                // debug info
-                System.out.println("\n\nStep: " + step.getId());
+                System.out.printf("Current simulation time: %.2fs\r", step.getCurrentMillis() / 1000.0);
 
                 executor.reset();
                 long stepStartTime = System.currentTimeMillis();
@@ -107,7 +107,7 @@ public class SumoController {
 
                 topicMap.forEach((domainTopic, metrics) -> {
                     // message topic included the domain-related topic name as well as the current simulation time step
-                    final String topic = metricsTopic + "/" + domainTopic + "/" + step.getId();
+                    final String topic = metricsTopic + "/" + domainTopic + "/" + step.getCurrentMillis();
 
                     metrics.parallel().forEach(payload ->
                         executor.execute(() -> {
@@ -119,7 +119,7 @@ public class SumoController {
                                 System.err.printf("""
                                     Failed to parse object with ID %s of domain %s in time step %s;
                                     Reason: %s
-                                    """, payload.id(), domainTopic, step.getId(), exp.getMessage());
+                                    """, payload.id(), domainTopic, step.getCurrentMillis(), exp.getMessage());
                             } catch (MessagingException exp) {
                                 System.err.println(exp.getMessage());
                             }
