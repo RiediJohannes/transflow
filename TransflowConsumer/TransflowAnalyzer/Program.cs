@@ -85,8 +85,6 @@ try
     // Configure the HTTP request pipeline.
     webApi.MapGet("/", () => "This service only supports communication through a gRPC client. HTTP/1.1 GET request is not supported.");
 
-    webApi.MapGrpcService<ExampleService>().EnableGrpcWeb()
-        .RequireCors("AllowAllGrpc").AddToGrpcBrowserWithClient<Greeter.GreeterClient>();
     webApi.MapGrpcService<SimulationService>().EnableGrpcWeb()
         .RequireCors("AllowAllGrpc").AddToGrpcBrowserWithClient<Simulations.SimulationsClient>();
     webApi.MapGrpcService<VehicleService>().EnableGrpcWeb()

@@ -1,0 +1,29 @@
+﻿@page "/"
+@inject Simulations.SimulationsClient Simulations
+
+<PageTitle>Test</PageTitle>
+
+<h1>Test gRPC connection</h1>
+
+<button class="btn btn-primary mt-3 mb-3" @onclick="SendRequest">Query simulations</button>
+
+@if (simulationsIds is not null) {
+    <p role="status"><strong>Simulations IDs:</strong>
+        @(simulationsIds.Any() 
+            ? string.Join(", ", simulationsIds)
+            : "Received an empty list")
+    </p>
+}
+
+
+@code {
+    private string[]? simulationsIds = null;
+
+    private async void SendRequest()
+    {
+        SimulationResponse result = await Simulations.GetSimulationsAsync(new Empty());
+
+        simulationsIds = result.SimulationsIds.Select(s => s.Id).ToArray();
+        StateHasChanged();
+    }
+}

@@ -19,7 +19,7 @@ builder.Services.AddSingleton(services =>
     var httpClient = new HttpClient(new GrpcWebHandler(GrpcWebMode.GrpcWeb, new HttpClientHandler()));
     var channel = GrpcChannel.ForAddress(transflowApiUrl, new GrpcChannelOptions { HttpClient = httpClient });
 
-    return new Greeter.GreeterClient(channel);
+    return new Simulations.SimulationsClient(channel);
 });
 
 await builder.Build().RunAsync();
