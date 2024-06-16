@@ -1,0 +1,8 @@
+﻿::deep .sim-link {
+    transition: filter ease-out 200ms;
+}
+
+::deep .sim-link:hover {
+    filter: brightness(1.2);
+}
+

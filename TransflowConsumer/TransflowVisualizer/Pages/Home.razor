@@ -1,0 +1,39 @@
+﻿@page "/"
+@inject Simulations.SimulationsClient Simulations
+
+<PageTitle>TransflowVisualizer</PageTitle>
+@* set page title in main layout *@
+<SectionContent SectionName=@Constants.SectionNamePageTitle>
+    TransflowVisualizer
+</SectionContent>
+
+
+<h1 class="mt-6 mb-4">Simulations</h1>
+
+@if (simulationsIds is not null)
+{
+    @foreach (string simId in simulationsIds)
+    {
+        string target = $"/simulations/{simId}";
+        <a href=@target class="sim-link">
+            <MudPaper Class="pa-6 ma-2 sim-link" Elevation="2"><span>@simId</span></MudPaper>
+        </a>
+    }
+}
+else
+{
+    <MudText Align="Align.Center" Class="mt-6"><i>There are no records of any simulation</i></MudText>
+}
+
+
+@code {
+    private string[]? simulationsIds = null;
+
+    protected async override Task OnInitializedAsync()
+    {
+        SimulationResponse result = await Simulations.GetSimulationsAsync(new Empty());
+
+        simulationsIds = result.SimulationsIds.Select(s => s.Id).ToArray();
+        StateHasChanged();
+    }
+}
