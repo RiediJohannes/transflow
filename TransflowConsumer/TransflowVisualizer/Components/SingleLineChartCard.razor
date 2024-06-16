@@ -17,6 +17,7 @@
     public ChartOptions ChartOptions { get; set; } = new ChartOptions();
 
 
+    private const int MIN_SERIES_LENGTH = 4;
     private string[] _xSeries = [];
     private List<ChartSeries> _ySeries = [];
 
@@ -24,12 +25,33 @@
     {
         if (XSeries.HasItems() && YSeries.HasItems())
         {
-            _xSeries = XSeries.ToArray();
+            _xSeries = EnsureMinimumLength(XSeries, MIN_SERIES_LENGTH, "-").ToArray();
 
-            var data = new ChartSeries() { Name = "Series", Data = YSeries.ToArray() };
+            var data = new ChartSeries() { Name = "Series", Data = EnsureMinimumLength(YSeries, MIN_SERIES_LENGTH, 0).ToArray() };
+            _ySeries.Clear();
             _ySeries.Add(data);
         }
 
         await base.OnParametersSetAsync();
+    }
+
+    // the graph library unfortunately requires data series of at least length four in order to perform interpolation
+    private IEnumerable<T> EnsureMinimumLength<T>(IEnumerable<T> collection, int minLength, T fillerItem)
+    {
+        int count = 0;
+
+        // first, yield the collection items
+        foreach (var item in collection)
+        {
+            yield return item;
+            count++;
+        }
+
+        // if we run out of items, return filler items until we reacth the minimum length
+        while (count < minLength)
+        {
+            yield return fillerItem;
+            count++;
+        }
     }
 }

@@ -99,6 +99,8 @@
             }
         }
 
+        await OnVehicleSelectionChanged(); // rerender graphs when parameters change
+
         await base.OnParametersSetAsync();
     }
 
