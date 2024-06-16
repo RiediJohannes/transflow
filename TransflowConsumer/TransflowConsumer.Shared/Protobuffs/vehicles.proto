@@ -11,11 +11,11 @@ package vehicle;
 
 service Vehicles {
 	rpc GetVehicles (simulation.SimulationId) returns (VehicleList);
-  rpc GetVehicleTypes (simulation.SimulationId) returns (VehicleTypeList);
+	rpc GetVehicleTypes (simulation.SimulationId) returns (VehicleTypeList);
 
-  rpc GetVehicleDataFull (SingleEntity) returns (VehicleDataRange);
-  rpc GetVehicleDataPoint (SingleEntityDataPoint) returns (VehicleDataPoint);
-  rpc GetVehicleDataRange (SingleEntityDataRange) returns (VehicleDataRange);
+	rpc GetVehicleDataFull (SingleEntity) returns (VehicleDataRange);
+	rpc GetVehicleDataPoint (SingleEntityDataPoint) returns (VehicleDataPoint);
+	rpc GetVehicleDataRange (SingleEntityDataRange) returns (VehicleDataRange);
 
 	rpc GetVehicleTypeData (SingleEntity) returns (VehicleTypeDataPoint);
 }

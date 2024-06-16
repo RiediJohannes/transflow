@@ -1,0 +1,47 @@
+﻿@page "/simulations/{SimulationId}"
+@inject Vehicles.VehiclesClient VehicleService
+@inject Simulations.SimulationsClient SimulationService
+
+
+<PageTitle>@_pageTitle</PageTitle>
+
+@* set page title in main layout *@
+<SectionContent SectionName=@Constants.SectionNamePageTitle>
+    @_pageTitle
+</SectionContent>
+
+<section>
+    <h1 class="mt-6">Vehicle Count: @_vehicles.Count</h1>
+</section>
+
+
+
+@code {
+    [Parameter]
+    public string? SimulationId { get; init; }
+
+
+    private List<VehicleKey> _vehicles = [];
+    private string _pageTitle = "Loading simulation...";
+
+    protected async override Task OnParametersSetAsync()
+    {
+        VehicleList vehicleResult = await VehicleService.GetVehiclesAsync(new SimulationId() { Id = SimulationId + "hi" });
+        _vehicles = vehicleResult.Vehicles.ToList();
+
+        _pageTitle = $"Simulation - {SimulationId}";
+
+        // if we received an empty list of vehicles, check if the requested simulation even exists
+        if (_vehicles.Count == 0)
+        {
+            SimulationResponse simulationsResult = await SimulationService.GetSimulationsAsync(new Empty());
+
+            if (!simulationsResult.SimulationsIds.Any(sim => sim.Id == SimulationId + "hi"))
+            {
+                _pageTitle = "Simulation not found";
+            }
+        }
+
+        await base.OnParametersSetAsync();
+    }
+}

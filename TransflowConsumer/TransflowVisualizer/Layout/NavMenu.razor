@@ -1,10 +1,32 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Test</MudNavLink>
+﻿@using System.Web
+@inject Simulations.SimulationsClient SimulationService
 
-@*     <MudNavLink Href="/servers" Match="NavLinkMatch.Prefix">Servers</MudNavLink>
-    <MudNavGroup Title="Settings" Expanded="true">
-        <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
-        <MudNavLink Href="/security" Match="NavLinkMatch.Prefix">Security</MudNavLink>
+<MudNavMenu>
+    <MudNavLink Href="/" Match="NavLinkMatch.All">Home</MudNavLink>
+
+    <MudNavGroup Title="Simulations" Expanded=@HasSimulations Disabled=@(!HasSimulations)>
+        @foreach (string simId in _simulations)
+        {
+            string simUrl = "/simulations/" + HttpUtility.UrlEncode(simId);
+            <MudNavLink Href=@simUrl Match="NavLinkMatch.All">@simId</MudNavLink>
+        }
     </MudNavGroup>
-    <MudNavLink Href="/about" Match="NavLinkMatch.Prefix">About</MudNavLink> *@
 </MudNavMenu>
+
+
+@code {
+    private readonly List<string> _simulations = [];
+
+    private bool HasSimulations => _simulations is not null && _simulations.Count > 0;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        SimulationResponse result = await SimulationService.GetSimulationsAsync(new Empty());
+
+        _simulations.Clear();
+        _simulations.AddRange(result.SimulationsIds.Select(sim => sim.Id));
+
+        await base.OnInitializedAsync();
+    }
+}
