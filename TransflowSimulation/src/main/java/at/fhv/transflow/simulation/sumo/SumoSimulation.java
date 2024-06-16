@@ -5,6 +5,7 @@ import org.eclipse.sumo.libsumo.StringVector;
 
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.Locale;
 
 
 /**
@@ -32,7 +33,9 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
             .replaceFirst("[.][^.]+$", "");
 
         // start the simulation
-        Simulation.start(new StringVector(new String[]{"sumo", "-c", simulationConfig.toString(), "-v"}));
+        Simulation.start(new StringVector(new String[]{"sumo", "-v",
+            "-c", simulationConfig.toString(),
+            "--step-length", String.format(Locale.US, "%.3f", stepTimeMillis / 1000.0)}));
         stepIterator = new SumoStepIterator(stepTimeMillis, stepIncrement);
     }
 
