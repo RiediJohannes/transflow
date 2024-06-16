@@ -3,7 +3,6 @@ package at.fhv.transflow.simulation.sumo;
 import org.eclipse.sumo.libsumo.Simulation;
 import org.eclipse.sumo.libsumo.StringVector;
 
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -18,25 +17,26 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
     private final String simName;
 
     /**
-     * Instantiates the controller for a new SUMO simulation as defined by the given sumocfg file.
-     * @param simulationConfig Relative path to the simulation configuration file with the file extension <em>.sumocfg</em>.
+     * Instantiates a wrapper around a new SUMO simulation as defined by the given <code>sumocfg</code> file.
      */
-    public SumoSimulation(Path simulationConfig, int stepIncrement, int stepTimeMillis) throws SumoConfigurationException {
+    public SumoSimulation(SimulationOptions options) throws SumoConfigurationException {
         // load additional libraries if needed
 //        System.loadLibrary("iconv-2");
 //        System.loadLibrary("intl-8");
 //        System.loadLibrary("proj_9_0");
         System.loadLibrary("libsumojni");
 
-        // take the name of the config file as this simulation's name (without file extension)
-        this.simName = simulationConfig.getFileName().toString()
-            .replaceFirst("[.][^.]+$", "");
+        // if no custom name was specified, take the name of the config file as this simulation's name (without file extension)
+        this.simName = options.getSimulationRunName().orElse(
+            options.getSimConfigPath().getFileName().toString().replaceFirst("[.][^.]+$", "")
+        );
 
         // start the simulation
         Simulation.start(new StringVector(new String[]{"sumo", "-v",
-            "-c", simulationConfig.toString(),
-            "--step-length", String.format(Locale.US, "%.3f", stepTimeMillis / 1000.0)}));
-        stepIterator = new SumoStepIterator(stepTimeMillis, stepIncrement);
+            "-c", options.getSimConfigPath().toString(),
+            "--step-length", String.format(Locale.US, "%.3f", options.getStepMillis() / 1000.0)}));
+
+        stepIterator = new SumoStepIterator(options.getStepMillis(), options.getStepIncrement());
     }
 
 

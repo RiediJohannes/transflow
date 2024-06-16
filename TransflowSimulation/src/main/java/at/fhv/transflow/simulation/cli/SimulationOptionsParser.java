@@ -1,5 +1,6 @@
 package at.fhv.transflow.simulation.cli;
 
+import at.fhv.transflow.simulation.sumo.SimulationOptions;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -48,6 +49,13 @@ public class SimulationOptionsParser extends DefaultParser {
             .build()
         );
 
+        options.addOption(Option.builder(SIM_NAME.shortName).longOpt(SIM_NAME.fullName)
+            .desc("A custom name given to this specific simulation run. This will override the default " +
+                "usually created from the simulation config's file name and the current timestamp.")
+            .hasArg().argName("sim-run-name").type(String.class)
+            .build()
+        );
+
         options.addOption(HELP.shortName, HELP.fullName, false,
             "Show this helpful usage summary for the command.");
     }
@@ -80,6 +88,10 @@ public class SimulationOptionsParser extends DefaultParser {
 
             if (cmd.hasOption(STEP_TIME.shortName)) {
                 simOptions.setStepMillis(cmd.getParsedOptionValue(STEP_TIME.shortName));
+            }
+
+            if (cmd.hasOption(SIM_NAME.shortName)) {
+                simOptions.setSimulationRunName(cmd.getOptionValue(SIM_NAME.shortName));
             }
 
             var unrecognizedArgs = cmd.getArgList();

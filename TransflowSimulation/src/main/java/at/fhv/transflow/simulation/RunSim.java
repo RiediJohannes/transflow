@@ -1,13 +1,13 @@
 package at.fhv.transflow.simulation;
 
 import at.fhv.transflow.simulation.cli.ErrorCode;
-import at.fhv.transflow.simulation.cli.SimulationOptions;
+import at.fhv.transflow.simulation.messaging.stdout.StandardOutputService;
+import at.fhv.transflow.simulation.sumo.SimulationOptions;
 import at.fhv.transflow.simulation.cli.SimulationOptionsParser;
 import at.fhv.transflow.simulation.cli.SystemError;
 import at.fhv.transflow.simulation.messaging.IMessagingService;
 import at.fhv.transflow.simulation.messaging.MessagingException;
 import at.fhv.transflow.simulation.messaging.mqtt.MqttService;
-import at.fhv.transflow.simulation.messaging.stdout.StandardOutputService;
 import at.fhv.transflow.simulation.sumo.SumoConfigurationException;
 import at.fhv.transflow.simulation.sumo.SumoController;
 import at.fhv.transflow.simulation.sumo.SumoSimulation;
@@ -54,14 +54,12 @@ public class RunSim {
                 new SystemError(ErrorCode.NO_MQTT_METRICS_TOPIC));
 
 
-            try (SumoSimulation simulation = new SumoSimulation(
-                options.getSimConfigPath(), options.getStepIncrement(), options.getStepMillis());
-
+            try (SumoSimulation simulation = new SumoSimulation(options);
                  IMessagingService messenger = new MqttService(mqttBroker, mqttClientId, mqttOptions)) {
 //                 IMessagingService messenger = new StandardOutputService(false)) {
 
                 // load the simulation and run it while continuously sending simulation metrics to the given messaging service
-                SumoController simController = new SumoController(simulation, messenger);
+                SumoController simController = new SumoController(simulation, messenger, options.hasCustomName());
                 simController.runSimulation(rootTopic, metricsTopic, options.getDelayMillis());
 
             } catch (MessagingException exp) {

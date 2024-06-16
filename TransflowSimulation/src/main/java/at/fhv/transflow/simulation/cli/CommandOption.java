@@ -4,7 +4,8 @@ public enum CommandOption {
     DELAY("d", "delay"),
     INTERACTIVE("i", "interactive"),
     STEP_INCREMENT("s", "step-increment"),
-    STEP_TIME("t", "step-t"),
+    STEP_TIME("t", "step-time"),
+    SIM_NAME("n", "name"),
     HELP("h", "help");
 
 

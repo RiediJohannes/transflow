@@ -24,10 +24,21 @@ public class SumoController {
     private final SumoSimulation simulation;
     private final IMessagingService messagingService;
     private Instant startTime;
+    private final boolean excludeTimeStamp;
+
 
     public SumoController(SumoSimulation simulation, IMessagingService messagingService) {
+        this(simulation, messagingService, true);
+    }
+
+    /**
+     * @param excludeTimestamp If set to true, the timestamp of the simulation run start instant (usually added to the simulation
+     *                         name to ensure a unique identifier for the simulation run) will be OMITTED.
+     */
+    public SumoController(SumoSimulation simulation, IMessagingService messagingService, boolean excludeTimestamp) {
         this.simulation = simulation;
         this.messagingService = messagingService;
+        this.excludeTimeStamp = excludeTimestamp;
     }
 
 
@@ -46,8 +57,9 @@ public class SumoController {
      * @return A string representation of <code>[filename (without extension)]@[ISO-8601-timestamp]</code>.
      */
     public String getId() {
-        // [simName]@[ISO-8601-timestamp] or else [simName]@ready
-        return simulation.getName() + "@" + getStartTime()
+        return excludeTimeStamp
+            ? simulation.getName()
+            : simulation.getName() + "@" + getStartTime() // [simName]@[ISO-8601-timestamp] or else [simName]@ready
             .map(Instant::toString)
             .orElse("ready");
     }

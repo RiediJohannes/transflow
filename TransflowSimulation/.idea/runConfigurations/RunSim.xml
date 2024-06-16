@@ -11,7 +11,7 @@
       <option name="taskNames">
         <list>
           <option value="run" />
-          <option value="--args=&quot;-d 10 -s 4 -t 250 sim/test.sumocfg&quot;" />
+          <option value="--args=&quot;-d 10 -s 4 -t 250 -n &quot;testRun&quot; sim/test.sumocfg&quot;" />
         </list>
       </option>
       <option name="vmOptions" />

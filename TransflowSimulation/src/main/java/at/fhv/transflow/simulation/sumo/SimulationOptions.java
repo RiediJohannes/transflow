@@ -1,6 +1,7 @@
-package at.fhv.transflow.simulation.cli;
+package at.fhv.transflow.simulation.sumo;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 
 public class SimulationOptions {
@@ -9,6 +10,7 @@ public class SimulationOptions {
     private int stepIncrement = 1;
     private int interactionInterval = 0;
     private int stepMillis = 1000;
+    private String simRunName = null;
     private Path simConfigPath = null;
 
     public SimulationOptions() {
@@ -52,6 +54,19 @@ public class SimulationOptions {
 
     public void setStepMillis(int stepMillis) {
         this.stepMillis = stepMillis;
+    }
+
+
+    public Optional<String> getSimulationRunName() {
+        return Optional.ofNullable(simRunName);
+    }
+
+    public void setSimulationRunName(String simulationRunName) {
+        this.simRunName = simulationRunName;
+    }
+
+    public boolean hasCustomName() {
+        return simRunName != null;
     }
 
 
