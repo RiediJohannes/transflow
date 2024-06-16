@@ -12,8 +12,6 @@
 
 
 <section class="pt-2">
-    @* <h1 class="mt-6">Vehicle Count: @_vehicles.Count</h1> *@
-
     <MudGrid Class="pa-4">
         <MudItem xs="12" sm="4">
             <MudText Typo="Typo.h6" GutterBottom="true">Select vehicle</MudText>
@@ -41,12 +39,12 @@
 
             <MudItem xs="12" sm="6">
                 <SingleLineChartCard ChartName="Speed" ChartOptions=@_chartOptions
-                                     Data=@Series2.First().Data XSeries=@XAxisLabels />
+                                     YSeries=@_speedTimeSeries XSeries=@_timeLine />
             </MudItem>
 
             <MudItem xs="12" sm="6">
                 <SingleLineChartCard ChartName="Fuel Consumption" ChartOptions=@_chartOptions
-                                     Data=@Series1.First().Data XSeries=@XAxisLabels />
+                                     YSeries=@_fuelTimeSeries XSeries=@_timeLine />
             </MudItem>
         }
     </MudGrid>
@@ -57,17 +55,6 @@
 @code {
     public ChartOptions _chartOptions = new ChartOptions();
 
-    public List<ChartSeries> Series1 = new List<ChartSeries>()
-    {
-        new ChartSeries() { Name = "Fossil", Data = new double[] { 90, 79, 72, 69, 62, 62, 55, 65, 70 } },
-    };
-    public List<ChartSeries> Series2 = new List<ChartSeries>()
-    {
-        new ChartSeries() { Name = "Renewable", Data = new double[] { 10, 41, 35, 51, 49, 62, 69, 91, 148 } },
-    };
-    public string[] XAxisLabels = { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
-
-
     [Parameter]
     public string? SimulationId { get; set; }
 
@@ -75,7 +62,9 @@
     private string _pageTitle = "Loading simulation...";
     private List<VehicleKey> _vehicleKeys = [];
     private VehicleTypeData? _vehicleTypeInfo;
-    private List<VehicleData> _vehicleTimeSeries = [];
+    private string[] _timeLine = [];
+    private IEnumerable<double> _speedTimeSeries = [];
+    private IEnumerable<double> _fuelTimeSeries = [];
 
     private SimulationId CurrentSimulation { get; set; } = new SimulationId() { Id = string.Empty };
     private VehicleKey? SelectedVehicle { get; set; }
@@ -86,6 +75,7 @@
     protected override void OnInitialized()
     {
         _chartOptions.DisableLegend = true;
+        _chartOptions.InterpolationOption = InterpolationOption.NaturalSpline;
         base.OnInitialized();
     }
 
@@ -119,8 +109,15 @@
         if (SelectedVehicle is not null)
         {
             var vehTypeKey = new SingleEntity() { EntityId = SelectedVehicle.VehicleTypeId, SimulationId = CurrentSimulation };
-            var typeDataReply = await VehicleService.GetVehicleTypeDataAsync(vehTypeKey);
+            VehicleTypeDataPoint typeDataReply = await VehicleService.GetVehicleTypeDataAsync(vehTypeKey);
             _vehicleTypeInfo = typeDataReply.Data;
+
+            var vehKey = new SingleEntity() { EntityId = SelectedVehicle.Id, SimulationId = CurrentSimulation };
+            VehicleDataRange vehDataReply = await VehicleService.GetVehicleDataFullAsync(vehKey);
+
+            _timeLine = vehDataReply.Points.Select(veh => veh.TimeStep.ToString()).ToArray();
+            _speedTimeSeries = vehDataReply.Points.Select(veh => veh.Speed.HasValue ? veh.Speed.Value : 0.0).ToList();
+            _fuelTimeSeries = vehDataReply.Points.Select(veh => veh.FuelConsumption.HasValue ? veh.FuelConsumption.Value : 0.0).ToList();
         }
 
         await Task.CompletedTask;
