@@ -23,7 +23,7 @@ public abstract class VehicleMapper {
      */
     public enum Fields {
         HEX_COLOR(Constants.VAR_COLOR),
-        VEHICLE_TYPE_ID(Constants.VAR_VEHICLECLASS),
+        VEHICLE_TYPE_ID(Constants.VAR_TYPE),
         LENGTH(Constants.VAR_LENGTH),
         WIDTH(Constants.VAR_WIDTH),
         HEIGHT(Constants.VAR_HEIGHT),
