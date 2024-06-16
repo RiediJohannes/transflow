@@ -1,0 +1,30 @@
+﻿<MudPaper Width="100%" Elevation="1" Class="pt-2 ps-3 pb-3">
+    <MudText Typo=Typo.h6 Align=Align.Center GutterBottom="false">@ChartName</MudText>
+
+    <MudChart ChartType="ChartType.Line" ChartSeries="@_ySeries" ChartOptions="@ChartOptions"
+              XAxisLabels="@XSeries" Width="100%" />
+</MudPaper>
+
+
+@code {
+    [Parameter, EditorRequired]
+    public string ChartName { get; set; } = "title";
+    [Parameter, EditorRequired]
+    public IEnumerable<double> Data { get; set; } = [];
+    [Parameter]
+    public string[] XSeries { get; set; } = ["1", "2", "3", "4"];
+    [Parameter]
+    public ChartOptions ChartOptions { get; set; } = new ChartOptions();
+
+
+
+    private List<ChartSeries> _ySeries = [];
+
+    protected async override Task OnParametersSetAsync()
+    {
+        var data = new ChartSeries() { Name = "Series", Data = Data.ToArray() };
+        _ySeries.Add(data);
+
+        await base.OnParametersSetAsync();
+    }
+}

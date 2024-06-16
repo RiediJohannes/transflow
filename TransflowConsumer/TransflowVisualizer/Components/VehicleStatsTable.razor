@@ -1,0 +1,40 @@
+﻿
+@if (VehicleTypeInfo is not null)
+{
+    <table class="property-table">
+        <tbody>
+            <tr>
+                <td>Length:</td>
+                <td>@VehicleTypeInfo.Length m</td>
+            </tr>
+            <tr>
+                <td>Width:</td>
+                <td>@VehicleTypeInfo.Width m</td>
+            </tr>
+            <tr>
+                <td>Height:</td>
+                <td>@VehicleTypeInfo.Height m</td>
+            </tr>
+            <tr>
+                <td>Max speed:</td>
+                <td>@VehicleTypeInfo.MaxSpeed km/h</td>
+            </tr>
+            <tr>
+                <td>Max acceleration:</td>
+                <td>@VehicleTypeInfo.MaxAcceleration m/s²</td>
+            </tr>
+        </tbody>
+    </table>
+}
+else
+{
+    <MudText Align="Align.Center" Typo="Typo.body2">
+        No model info available for this vehicle
+    </MudText>
+}
+
+
+@code {
+    [Parameter, EditorRequired]
+    public VehicleTypeData? VehicleTypeInfo { get; set; }
+}

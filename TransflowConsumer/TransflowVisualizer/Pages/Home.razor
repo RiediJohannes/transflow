@@ -36,6 +36,7 @@ else
         SimulationResponse result = await Simulations.GetSimulationsAsync(new Empty());
 
         _simulationsIds = result.SimulationsIds.Select(s => s.Id).ToArray();
-        StateHasChanged();
+        
+        await base.OnInitializedAsync();
     }
 }

@@ -10,6 +10,7 @@
     <h1 class="page-title">@_pageTitle</h1>
 </SectionContent>
 
+
 <section class="pt-2">
     @* <h1 class="mt-6">Vehicle Count: @_vehicles.Count</h1> *@
 
@@ -17,62 +18,44 @@
         <MudItem xs="12" sm="4">
             <MudText Typo="Typo.h6" GutterBottom="true">Select vehicle</MudText>
             <MudPaper Width="100%">
-                <MudList Clickable="true" Dense="true" Class="top-row-card" DisablePadding="true">
-                    <MudListItem Text="C1" />
-                    <MudListItem Text="C2" />
-                    <MudListItem Text="C3" />
+                <MudList Clickable="true" Dense="true" Class="top-row-card" DisablePadding="true"
+                        @bind-SelectedItem=@SelectedItem @bind-SelectedItem:after=@OnVehicleSelectionChanged >
+                    @foreach (var vehicleKey in _vehicleKeys)
+                    {
+                        <MudListItem Text=@vehicleKey.Id Value=@vehicleKey />
+                    }
                 </MudList>
             </MudPaper>
         </MudItem>
 
-        <MudItem xs="12" sm="5" Class="top-row">
-            <MudText Typo="Typo.h6" GutterBottom="true">Vehicle C1</MudText>
-            <MudPaper Width="100%" Elevation="0" Class="top-row-card pa-2">
-                <table class="property-table">
-                    <tbody>
-                        <tr>
-                            <td>Length:</td><td>2m</td>
-                        </tr>
-                        <tr>
-                            <td>Length:</td><td>2m</td>
-                        </tr>
-                        <tr>
-                            <td>Length:</td><td>2m</td>
-                        </tr>
-                        <tr>
-                            <td>Length:</td><td>2m</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </MudPaper>
-        </MudItem>
+        @if (SelectedVehicle is not null)
+        {
+            <MudItem xs="12" sm="5" Class="top-row">
+                <MudText Typo="Typo.h6" GutterBottom="true">Vehicle @SelectedVehicle.Id</MudText>
+                <MudPaper Width="100%" Elevation="0" Class="top-row-card pa-2">
+                    <VehicleStatsTable VehicleTypeInfo=@_vehicleTypeInfo />
+                </MudPaper>
+            </MudItem>
 
-        <MudDivider Class="my-2"/>
+            <MudDivider Class="my-2" />
 
-        <MudItem xs="12" sm="6">
-            <MudPaper Width="100%" Elevation="1" Class="pt-2 ps-3 pb-3">
-                <MudText Typo=Typo.h6 Align=Align.Center GutterBottom="false">Speed</MudText>
-                <MudChart ChartType="ChartType.Line" ChartSeries="@Series1" ChartOptions="@Options"
-                          XAxisLabels="@XAxisLabels" Width="100%" />
-            </MudPaper>
-        </MudItem>
+            <MudItem xs="12" sm="6">
+                <SingleLineChartCard ChartName="Speed" ChartOptions=@_chartOptions
+                                     Data=@Series2.First().Data XSeries=@XAxisLabels />
+            </MudItem>
 
-        <MudItem xs="12" sm="6">
-            <MudPaper Width="100%" Elevation="1" Class="pt-2 ps-3 pb-3">
-                <MudText Typo=Typo.h6 Align=Align.Center GutterBottom="false">Fuel consumption</MudText>
-                <MudChart ChartType="ChartType.Line" ChartSeries="@Series2" ChartOptions="@Options"
-                          XAxisLabels="@XAxisLabels" Width="100%" />
-            </MudPaper>
-        </MudItem>
+            <MudItem xs="12" sm="6">
+                <SingleLineChartCard ChartName="Fuel Consumption" ChartOptions=@_chartOptions
+                                     Data=@Series1.First().Data XSeries=@XAxisLabels />
+            </MudItem>
+        }
     </MudGrid>
-   
 </section>
 
 
 
 @code {
-    private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
-    public ChartOptions Options = new ChartOptions();
+    public ChartOptions _chartOptions = new ChartOptions();
 
     public List<ChartSeries> Series1 = new List<ChartSeries>()
     {
@@ -82,27 +65,41 @@
     {
         new ChartSeries() { Name = "Renewable", Data = new double[] { 10, 41, 35, 51, 49, 62, 69, 91, 148 } },
     };
-    public string[] XAxisLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
+    public string[] XAxisLabels = { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
 
 
     [Parameter]
     public string? SimulationId { get; set; }
 
 
-    private List<VehicleKey> _vehicles = [];
     private string _pageTitle = "Loading simulation...";
+    private List<VehicleKey> _vehicleKeys = [];
+    private VehicleTypeData? _vehicleTypeInfo;
+    private List<VehicleData> _vehicleTimeSeries = [];
+
+    private SimulationId CurrentSimulation { get; set; } = new SimulationId() { Id = string.Empty };
+    private VehicleKey? SelectedVehicle { get; set; }
+    private MudListItem? SelectedItem { get; set; }
+    private EventCallback<MudListItem>? SelectedItemChanged { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        _chartOptions.DisableLegend = true;
+        base.OnInitialized();
+    }
 
     protected async override Task OnParametersSetAsync()
     {
-        Options.DisableLegend = true;
+        CurrentSimulation = new SimulationId() { Id = SimulationId };
 
-        VehicleList vehicleResult = await VehicleService.GetVehiclesAsync(new SimulationId() { Id = SimulationId });
-        _vehicles = vehicleResult.Vehicles.ToList();
+        VehicleList vehicleResult = await VehicleService.GetVehiclesAsync(CurrentSimulation);
+        _vehicleKeys = vehicleResult.Vehicles.ToList();
 
         _pageTitle = $"Simulation - {SimulationId}";
 
         // if we received an empty list of vehicles, check if the requested simulation even exists
-        if (_vehicles.Count == 0)
+        if (_vehicleKeys.Count == 0)
         {
             SimulationResponse simulationsResult = await SimulationService.GetSimulationsAsync(new Empty());
 
@@ -113,5 +110,19 @@
         }
 
         await base.OnParametersSetAsync();
+    }
+
+    private async Task OnVehicleSelectionChanged()
+    {
+        SelectedVehicle = SelectedItem?.Value as VehicleKey;
+
+        if (SelectedVehicle is not null)
+        {
+            var vehTypeKey = new SingleEntity() { EntityId = SelectedVehicle.VehicleTypeId, SimulationId = CurrentSimulation };
+            var typeDataReply = await VehicleService.GetVehicleTypeDataAsync(vehTypeKey);
+            _vehicleTypeInfo = typeDataReply.Data;
+        }
+
+        await Task.CompletedTask;
     }
 }
