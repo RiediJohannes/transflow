@@ -6,12 +6,14 @@
 
 <MudLayout>
     <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Class="me-3"
+            Color="Color.Inherit" Edge="Edge.Start"
+            OnClick="@((e) => DrawerToggle())" />
         
         @* dynamic part of the app bar that may change on every page *@
         <SectionOutlet SectionName=@Constants.SectionNamePageTitle />
         <SectionContent SectionName=@Constants.SectionNamePageTitle>
-            Transflow Visualizer @* default app bar title *@
+            <h1 class="page-title">Transflow Visualizer</h1> @* default app bar title *@
         </SectionContent>
     </MudAppBar>
 
@@ -25,6 +27,7 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+
 @code {
     bool _drawerOpen = true;
 

@@ -1,0 +1,16 @@
+﻿::deep .top-row-card {
+    max-height: 100px;
+    overflow: auto;
+}
+
+.property-table {
+    border: none;
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: auto;
+
+}
+
+/*    .property-table td:nth-child(1) {
+        width: 30%;
+    }*/

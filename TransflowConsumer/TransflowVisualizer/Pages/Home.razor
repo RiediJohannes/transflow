@@ -4,19 +4,21 @@
 <PageTitle>TransflowVisualizer</PageTitle>
 @* set page title in main layout *@
 <SectionContent SectionName=@Constants.SectionNamePageTitle>
-    TransflowVisualizer
+    <h1 class="page-title">Transflow Visualizer</h1>
 </SectionContent>
 
 
 <h1 class="mt-6 mb-4">Simulations</h1>
 
-@if (simulationsIds is not null)
+@if (_simulationsIds is not null && _simulationsIds.Length > 0)
 {
-    @foreach (string simId in simulationsIds)
+    @foreach (string simId in _simulationsIds)
     {
         string target = $"/simulations/{simId}";
-        <a href=@target class="sim-link">
-            <MudPaper Class="pa-6 ma-2 sim-link" Elevation="2"><span>@simId</span></MudPaper>
+        <a href=@target>
+            <MudPaper Class="pa-6 ma-2 sim-link" Elevation="2">
+                <span>@simId</span>
+            </MudPaper>
         </a>
     }
 }
@@ -27,13 +29,13 @@ else
 
 
 @code {
-    private string[]? simulationsIds = null;
+    private string[]? _simulationsIds = null;
 
     protected async override Task OnInitializedAsync()
     {
         SimulationResponse result = await Simulations.GetSimulationsAsync(new Empty());
 
-        simulationsIds = result.SimulationsIds.Select(s => s.Id).ToArray();
+        _simulationsIds = result.SimulationsIds.Select(s => s.Id).ToArray();
         StateHasChanged();
     }
 }
