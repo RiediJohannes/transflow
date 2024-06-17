@@ -5,23 +5,23 @@
         <tbody>
             <tr>
                 <td>Length:</td>
-                <td>@VehicleTypeInfo.Length m</td>
+                <td>@WithUnit(VehicleTypeInfo.Length, "m")</td>
             </tr>
             <tr>
                 <td>Width:</td>
-                <td>@VehicleTypeInfo.Width m</td>
+                <td>@WithUnit(VehicleTypeInfo.Width, "m")</td>
             </tr>
             <tr>
                 <td>Height:</td>
-                <td>@VehicleTypeInfo.Height m</td>
+                <td>@WithUnit(VehicleTypeInfo.Height, "m")</td>
             </tr>
             <tr>
                 <td>Max speed:</td>
-                <td>@VehicleTypeInfo.MaxSpeed km/h</td>
+                <td>@MapOrDefault(VehicleTypeInfo.MaxSpeed, s => $"{Math.Round(s * 3.6, 2)} km/h")</td>
             </tr>
             <tr>
                 <td>Max acceleration:</td>
-                <td>@VehicleTypeInfo.MaxAcceleration m/s²</td>
+                <td>@WithUnit(VehicleTypeInfo.MaxAcceleration, "m/s²")</td>
             </tr>
         </tbody>
     </table>
@@ -37,4 +37,19 @@ else
 @code {
     [Parameter, EditorRequired]
     public VehicleTypeData? VehicleTypeInfo { get; set; }
+
+    private string MapOrDefault<T>(T? nullableValue, Func<T, string> mappingFunction, string defaultValue = "n.a.")
+        where T : struct
+    {
+        return nullableValue is null
+            ? defaultValue
+            : mappingFunction.Invoke(nullableValue.Value);
+    } 
+
+    private string WithUnit<T>(T nullableValue, string unit, string defaultValue = "n.a.")
+    {
+        return nullableValue is null
+            ? defaultValue
+            : $"{nullableValue} {unit}";
+    }
 }

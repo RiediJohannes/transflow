@@ -139,10 +139,8 @@ public class SumoSimulation implements Iterable<SumoStep>, AutoCloseable {
         }
 
         public SumoStep executeSteps(int numberOfSteps) {
-            for (int s = 0; s < numberOfSteps; s++) {
-                currentMillis += stepMillis;
-                Simulation.step(currentMillis / 1000.0); // let SUMO perform the step
-            }
+            currentMillis += stepMillis * numberOfSteps;
+            Simulation.step(currentMillis / 1000.0); // let SUMO perform the step
 
             return new SumoStep(getCurrentMillis());
         }

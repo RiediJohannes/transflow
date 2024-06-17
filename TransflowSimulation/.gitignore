@@ -2,6 +2,7 @@
 *.properties
 
 build/
+sim/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/

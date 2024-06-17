@@ -76,6 +76,7 @@
     {
         _chartOptions.DisableLegend = true;
         _chartOptions.InterpolationOption = InterpolationOption.NaturalSpline;
+
         base.OnInitialized();
     }
 
@@ -84,7 +85,7 @@
         CurrentSimulation = new SimulationId() { Id = SimulationId };
 
         VehicleList vehicleResult = await VehicleService.GetVehiclesAsync(CurrentSimulation);
-        _vehicleKeys = vehicleResult.Vehicles.ToList();
+        _vehicleKeys = vehicleResult.Vehicles.OrderBy(v => v.Id).ToList();
 
         _pageTitle = $"Simulation - {SimulationId}";
 
